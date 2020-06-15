@@ -17,7 +17,8 @@
   <a href="#licensing">Licensing</a>
 </p>
 
-The goal of this project is ... _TBD_
+The goal of this project is to deliver Scripts, tutorials, and configuration
+files for setting up and manage Kubernetes cluster in a good way
 
 ## Status
 _TBD_
@@ -40,7 +41,7 @@ This project has adopted the [Contributor Covenant](https://www.contributor-cove
 
 ... we decided to apply _English_ as the primary project language.  
 
-Consequently, all content will be made available primarily in English. We also ask all interested people to use English as language to create issues, in their code (comments, documentation etc.) and when you send requests to us. The application itself and all end-user faing content will be made available in other languages as needed. 
+Consequently, all content will be made available primarily in English. We also ask all interested people to use English as language to create issues, in their code (comments, documentation etc.) and when you send requests to us. The application itself and all end-user faing content will be made available in other languages as needed.
 
 ## Documentation
 
