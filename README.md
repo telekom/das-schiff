@@ -1,5 +1,5 @@
 <h1 align="center">
-    telekom das-schiff
+    Telekom Das-Schiff
 </h1>
 
 <p align="center">
@@ -17,52 +17,12 @@
   <a href="#licensing">Licensing</a>
 </p>
 
-The goal of this project is to deliver Scripts, tutorials, and configuration
-files for setting up and manage Kubernetes cluster in a good way
+Das Schiff is managed Kubernetes of Deutsche Telekom Technik which combines GitOps and Cluster API to provide end-to-end, declarative, management of large number of clusters. Most of our external work is done in engagement with upstream projects. However some parts, specific for Das Schif, that do not belong natively to other projects might be open-sourced here once they are ready.
 
-## Status
-_TBD_
+In the mean time Das Schiff overview and demo could be seen here: <a href="https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251"></a>
 
-## About this component
-_TBD_
+#### Das Schiff Crew
 
-## Development
-
-_TBD_
-
-### Build
-
-
-## Code of Conduct
-
-This project has adopted the [Contributor Covenant](https://www.contributor-covenant.org/) in version 2.0 as our code of conduct. Please see the details in our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). All contributors must abide by the code of conduct.
-
-## Working Language
-
-... we decided to apply _English_ as the primary project language.  
-
-Consequently, all content will be made available primarily in English. We also ask all interested people to use English as language to create issues, in their code (comments, documentation etc.) and when you send requests to us. The application itself and all end-user faing content will be made available in other languages as needed.
-
-## Documentation
-
-The full documentation for the telekom can be found in _TBD_
-## Support and Feedback
-The following channels are available for discussions, feedback, and support requests:
-
-| Type                     | Channel                                                |
-| ------------------------ | ------------------------------------------------------ |
-| **General Discussion**   | <a href="https://github.com/telekom/das-schiff/issues/new/choose" title="General Discussion"><img src="https://img.shields.io/github/issues/telekom/das-schiff/question.svg?style=flat-square"></a> </a>   |
-| **Concept Feedback**    | <a href="https://github.com/telekom/das-schiff/issues/new/choose" title="Open Concept Feedback"><img src="https://img.shields.io/github/issues/telekom/das-schiff/architecture.svg?style=flat-square"></a>  |
-| **Connector-SDK**    | <a href="https://github.com/telekom/das-schiff/issues" title="Open Issues"><img src="https://img.shields.io/github/issues/telekom/das-schiff?style=flat"></a>  |
-| **Other Requests**    | <a href="mailto:opensource@telekom.de" title="Email CWA Team"><img src="https://img.shields.io/badge/email-CWA%20team-green?logo=mail.ru&style=flat-square&logoColor=white"></a>   |
-
-## How to Contribute
-
-Contribution and feedback is encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](./CONTRIBUTING.md). By participating in this project, you agree to abide by its [Code of Conduct](./CODE_OF_CONDUCT.md) at all times.
-
-## Contributors
-
-... At the same time our commitment to open source means that we are enabling -in fact encouraging- all interested parties to contribute and become part of its developer community.
 
 ## Licensing
 
