@@ -19,7 +19,7 @@
 
 Das Schiff is managed Kubernetes of Deutsche Telekom Technik which combines GitOps and Cluster API to provide end-to-end, declarative, management of large number of clusters. Most of our external work is done in engagement with upstream projects. However some parts, specific for Das Schif, that do not belong natively to other projects might be open-sourced here once they are ready.
 
-In the mean time Das Schiff overview and demo could be seen here: <a href="https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251"></a>
+In the mean time Das Schiff overview and demo could be seen here: <a href="https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251">Cluster API Office Hours Apr 15th, 2020</a>
 
 #### Das Schiff Crew
 
