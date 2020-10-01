@@ -17,9 +17,9 @@
   <a href="#licensing">Licensing</a>
 </p>
 
-Das Schiff is managed Kubernetes of Deutsche Telekom Technik which combines <a href="https://fluxcd.io/">GitOps</a> and <a href="https://cluster-api.sigs.k8s.io/introduction.html">Cluster API</a> to provide end-to-end, declarative, management of large number of clusters. Most of our external work is done in engagement with upstream projects. However some parts, specific for Das Schif, that do not belong natively to other projects, might be open-sourced here once they are ready.
+Das Schiff is managed Kubernetes of <a href="https://de.wikipedia.org/wiki/Telekom_Deutschland#Deutsche_Telekom_Technik_GmbH"><b>Deutsche Telekom Technik</b></a> which combines <a href="https://fluxcd.io/"><b>GitOps</b></a> and <a href="https://cluster-api.sigs.k8s.io/introduction.html"><b>Cluster API</b></a> to provide end-to-end, declarative, management of large number of clusters. Most of our external work is done in engagement with upstream projects. However some parts, specific for Das Schif, that do not belong natively to other projects, might be open-sourced here once they are ready.
 
-In the mean time Das Schiff overview and demo could be seen here: <a href="https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251" target="_blank">Cluster API Office Hours Apr 15th, 2020</a>
+In the mean time Das Schiff overview and demo could be seen here: <a href="https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251" target="_blank"><b>Cluster API Office Hours Apr 15th, 2020</b></a>
 
 #### -- Das Schiff Crew
 
