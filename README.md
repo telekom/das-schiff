@@ -21,6 +21,10 @@ Das Schiff is managed Kubernetes of <a href="https://de.wikipedia.org/wiki/Telek
 
 In the mean time Das Schiff overview and demo could be seen here: <a href="https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251" target="_blank"><b>Cluster API Office Hours Apr 15th, 2020</b></a>
 
+We have also talked about Das Schiff in several podcasts:<br>
+- <a href="https://semaphoreci.com/blog/cloud-native-adoption-vuk-gojnic" tarket="_blank"><b>Semaphore Uncut with Darko Fabijan</b></a>
+- <a href="https://www.weave.works/blog/kubernetes-at-deutsche-telekom-gitops-at-the-edge" tarket="_blank"><b>Art of Modern Ops with Cornelia Davis</b></a>
+
 #### -- Das Schiff Crew
 
 
