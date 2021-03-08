@@ -11,12 +11,12 @@ type Manager interface {
 	// GetOrAllocateIP assigns a single IP address within a subnet that's assigned to a cluster
 	// The identifier is used as the device name in the IPAM and the clusterIdentifier is used
 	// to identify the subnet.
-	GetOrAllocateIP(identifier string, clusterIdentifier string) (net.IP, error)
+	GetOrAllocateIP(identifier, clusterIdentifier string) (net.IP, error)
 
 	// ReleaseIP releases a single IP address within a subnet that's assigned to a cluster.
 	// The identifier is the device name within the IPAM and the clusterIdentifier is used
 	// to identify the subnet.
-	ReleaseIP(identifier string, clusterIdentifier string, addr net.IP) error
+	ReleaseIP(identifier, clusterIdentifier string) error
 }
 
 // type Subnet interface {

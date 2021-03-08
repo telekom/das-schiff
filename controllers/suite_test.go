@@ -19,9 +19,11 @@ package controllers
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/ipam/mock"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/cluster-api-provider-vsphere/api/v1alpha3"
@@ -40,6 +42,13 @@ import (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var ipamManager *mock.Manager
+
+const (
+	timeout  = time.Second * 10
+	duration = time.Second * 10
+	interval = time.Millisecond * 250
+)
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -71,6 +80,14 @@ var _ = BeforeSuite(func() {
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme: scheme.Scheme,
 	})
+	Expect(err).ToNot(HaveOccurred())
+
+	ipamManager = &mock.Manager{}
+	err = (&VSphereMachineIPAMReconciler{
+		Client: k8sManager.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("VSphereMachineIPAM"),
+		IPAM:   ipamManager,
+	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
