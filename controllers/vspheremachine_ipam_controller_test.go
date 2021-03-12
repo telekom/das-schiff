@@ -96,8 +96,7 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 					return false
 				}
 				dev := createdMachine.Spec.Network.Devices[0]
-				desiredIP, _ := ipamManager.GetOrAllocateIP(MachineName, ClusterName)
-				if len(dev.IPAddrs) < 1 || !net.ParseIP(dev.IPAddrs[0]).Equal(desiredIP) {
+				if len(dev.IPAddrs) < 1 || !net.ParseIP(dev.IPAddrs[0]).Equal(net.IPv4zero) {
 					return false
 				}
 				return true

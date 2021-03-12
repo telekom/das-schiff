@@ -62,7 +62,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// Deallocate the IP if the Machine is marked for deletion
 	hasFinalizer := util.HasFinalizer(vSphereMachine.GetObjectMeta(), finalizer)
 	if vSphereMachine.DeletionTimestamp != nil {
-		if hasFinalizer && vSphereMachine.DeletionTimestamp != nil {
+		if hasFinalizer {
 			log.Info("machine deleted, releasing ip")
 			err := r.IPAM.ReleaseIP(vSphereMachine.Name, clusterName)
 			if err != nil {
