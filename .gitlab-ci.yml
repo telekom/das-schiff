@@ -1,0 +1,49 @@
+variables:
+  IMAGE_NAME: artifactory.devops.telekom.de/schiff-docker/engine/schiff-operator
+
+.base:
+  tags:
+    - otc_run_docker_k8s
+
+.go:
+  extends: .base
+  image:
+    name: golang:1.16
+    entrypoint: ["/bin/bash"]
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+    # PATH: $PATH:$GOPATH/bin
+  before_script:
+    - mkdir -p .go
+  cache:
+    paths:
+      - .go/pkg/mod/
+      - .go/bin
+
+binary:
+  stage: build
+  extends: .go
+  script:
+    - make
+
+test:
+  stage: test
+  extends: .go
+  script:
+    - make test
+
+container-image:
+  stage: build
+  extends: .base
+  image:
+    name: artifactory.devops.telekom.de/gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --context $CI_PROJECT_DIR
+      --dockerfile $CI_PROJECT_DIR/Dockerfile
+      --destination $IMAGE_NAME:$CI_COMMIT_REF_SLUG
+      --cache=true --cache-repo $IMAGE_NAME
+      --build-arg http_proxy=$http_proxy
+      --build-arg https_proxy=$https_proxy
+      --build-arg no_proxy=$no_proxy
