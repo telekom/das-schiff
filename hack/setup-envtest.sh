@@ -98,6 +98,9 @@ function fetch_envtest_tools {
   tar -C "${dest_dir}" --strip-components=1 -zvxf "$envtest_tools_archive_path"
 }
 
-dest=/usr/local/kubebuilder
-mkdir -p $dest
-fetch_envtest_tools $dest
+# don't execute if the file is sourced
+if [[ "${BASH_SOURCE[0]}" = "${0}" ]]; then
+  dest=/usr/local/kubebuilder
+  mkdir -p $dest
+  fetch_envtest_tools $dest
+fi

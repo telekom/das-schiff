@@ -23,7 +23,7 @@ stages:
   cache:
     paths:
       - .go/pkg/mod/
-      - .go/bin
+      - testbin/
 
 binary:
   stage: build
