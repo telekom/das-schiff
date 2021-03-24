@@ -36,6 +36,7 @@ test:
   extends: .go
   script:
     - make test
+    - go tool cover -func cover.out | grep total
 
 container-image:
   stage: build
