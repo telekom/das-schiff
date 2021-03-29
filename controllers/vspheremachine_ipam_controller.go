@@ -30,6 +30,8 @@ type VSphereMachineIPAMReconciler struct {
 const clusterNameLabel = "cluster.x-k8s.io/cluster-name"
 const finalizer = "ipam.schiff.telekom.de/DeallocateMachineIP"
 const networkNameAnnotation = "ipam.schiff.telekom.de/NetworkName"
+const subnetAnnotation = "ipam.schiff.telekom.de/Subnet"
+const infobloxNetworkViewAnnotation = "ipam.schiff.telekom.de/InfobloxNetworkView"
 
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines/status,verbs=get
@@ -58,13 +60,28 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		log.Error(err, "cannot get cluster name")
 		return ctrl.Result{}, err
 	}
+	subnetAnno, ok := vSphereMachine.Annotations[subnetAnnotation]
+	if !ok {
+		log.V(2).Info("missing subnet annotation")
+		return ctrl.Result{}, nil
+	}
+	_, subnet, err := net.ParseCIDR(subnetAnno)
+	if err != nil {
+		log.Error(err, "failed to parse subnet CIDR", "subnet", subnetAnno)
+		return ctrl.Result{}, err
+	}
+	ibNetworkView, ok := vSphereMachine.Annotations[infobloxNetworkViewAnnotation]
+	if !ok {
+		log.V(2).Info("missing network zone annotation")
+		return ctrl.Result{}, nil
+	}
 
 	// Deallocate the IP if the Machine is marked for deletion
 	hasFinalizer := util.HasFinalizer(vSphereMachine.GetObjectMeta(), finalizer)
 	if vSphereMachine.DeletionTimestamp != nil {
 		if hasFinalizer {
 			log.Info("machine deleted, releasing ip")
-			err := r.IPAM.ReleaseIP(vSphereMachine.Name, clusterName)
+			err := r.IPAM.ReleaseIP(vSphereMachine.Name, ibNetworkView, subnet)
 			if err != nil {
 				log.Error(err, "failed to release ip address")
 				return ctrl.Result{}, err
@@ -91,7 +108,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	networkName, ok := vSphereMachine.Annotations[networkNameAnnotation]
 	if !ok {
-		// if there is no annotation, don't handle this machine
+		log.V(2).Info("missing network name annotation")
 		return ctrl.Result{}, nil
 	}
 
@@ -108,7 +125,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	desiredIP, err := r.IPAM.GetOrAllocateIP(vSphereMachine.Name, clusterName)
+	desiredIP, err := r.IPAM.GetOrAllocateIP(vSphereMachine.Name, ibNetworkView, subnet)
 	if err != nil {
 		log.Error(err, "failed to retrieve desired IP")
 		return ctrl.Result{}, err

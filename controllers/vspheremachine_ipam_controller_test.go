@@ -9,6 +9,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/cluster-api-provider-vsphere/api/v1alpha3"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -19,8 +20,13 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 		ClusterName = "test-cluster"
 		Template    = "test-template"
 		NetworkName = "testNetwork"
+		NetworkView = "testview"
 	)
 	var (
+		TestSubnet = net.IPNet{
+			IP:   net.IPv4(10, 0, 0, 0),
+			Mask: net.IPv4Mask(255, 255, 255, 0),
+		}
 		meta = v1.ObjectMeta{
 			Name:      MachineName,
 			Namespace: Namespace,
@@ -28,8 +34,10 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 				clusterNameLabel: ClusterName,
 			},
 			Annotations: map[string]string{
-				networkNameAnnotation: NetworkName,
-				clusterNameLabel:      ClusterName,
+				networkNameAnnotation:         NetworkName,
+				infobloxNetworkViewAnnotation: NetworkView,
+				subnetAnnotation:              TestSubnet.String(),
+				clusterNameLabel:              ClusterName,
 			},
 		}
 		NamespacedName = types.NamespacedName{Namespace: Namespace, Name: MachineName}
@@ -62,8 +70,9 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 			ctx := context.Background()
 			allocated := false
 			released := false
-			ipamManager.Callback = func(t, id, cid string) {
-				if id != MachineName || cid != ClusterName {
+			ipamManager.Callback = func(t, id, networkView string, subnet *net.IPNet) {
+				ctrl.Log.Info("ipam callback", "deviceName", id, "networkView", networkView, "subnet", subnet.String())
+				if id != MachineName || networkView != NetworkView || subnet.String() != TestSubnet.String() {
 					return
 				}
 				if t == "GetOrAllocate" {
@@ -120,7 +129,7 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 		It("doesn't assign an IP address when DHCP4 is enabled", func() {
 			ctx := context.Background()
 			called := false
-			ipamManager.Callback = func(t, _, _ string) {
+			ipamManager.Callback = func(t, _, _ string, _ *net.IPNet) {
 				called = true
 			}
 			machine := &v1alpha3.VSphereMachine{

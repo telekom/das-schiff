@@ -7,7 +7,7 @@ import (
 )
 
 type Manager struct {
-	Callback func(t, identifier, clusterIdentifier string)
+	Callback func(t, identifier, networkView string, subnet *net.IPNet)
 }
 type Subnet struct {
 	cid string
@@ -19,16 +19,16 @@ var _ ipam.Manager = &Manager{}
 // 	return Subnet{cid: clusterIdentifier}, nil
 // }
 
-func (m *Manager) GetOrAllocateIP(identifier, clusterIdentifier string) (net.IP, error) {
+func (m *Manager) GetOrAllocateIP(identifier, networkView string, subnet *net.IPNet) (net.IP, error) {
 	if m.Callback != nil {
-		m.Callback("GetOrAllocate", identifier, clusterIdentifier)
+		m.Callback("GetOrAllocate", identifier, networkView, subnet)
 	}
 	return net.IPv4zero, nil
 }
 
-func (m *Manager) ReleaseIP(identifier, clusterIdentifier string) error {
+func (m *Manager) ReleaseIP(identifier, networkView string, subnet *net.IPNet) error {
 	if m.Callback != nil {
-		m.Callback("ReleaseIP", identifier, clusterIdentifier)
+		m.Callback("ReleaseIP", identifier, networkView, subnet)
 	}
 	return nil
 }
