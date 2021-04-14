@@ -11,12 +11,12 @@ import (
 
 	"github.com/go-logr/logr"
 	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/ipam"
-	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/util"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api-provider-vsphere/api/v1alpha3"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // VSphereMachineIPAMReconciler reconciles a VSphereMachine object
@@ -77,7 +77,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	// Deallocate the IP if the Machine is marked for deletion
-	hasFinalizer := util.HasFinalizer(vSphereMachine.GetObjectMeta(), finalizer)
+	hasFinalizer := controllerutil.ContainsFinalizer(&vSphereMachine, finalizer)
 	if vSphereMachine.DeletionTimestamp != nil {
 		if hasFinalizer {
 			log.Info("machine deleted, releasing ip")
@@ -87,12 +87,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 				return ctrl.Result{}, err
 			}
 
-			for i, f := range vSphereMachine.Finalizers {
-				if f == finalizer {
-					vSphereMachine.Finalizers = append(vSphereMachine.Finalizers[:i], vSphereMachine.Finalizers[i+1:]...)
-					break
-				}
-			}
+			controllerutil.RemoveFinalizer(&vSphereMachine, finalizer)
 
 			err = r.Client.Update(ctx, &vSphereMachine)
 			if err != nil {
@@ -149,7 +144,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	if !hasFinalizer {
-		vSphereMachine.Finalizers = append(vSphereMachine.Finalizers, finalizer)
+		controllerutil.AddFinalizer(&vSphereMachine, finalizer)
 		changed = true
 	}
 
