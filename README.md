@@ -1,6 +1,6 @@
 # Das SCHIFF Engine Operator
 
-The engine operator contains all custom controllers and resources that are used within Das SCHIFF. It's built using the (Operator SDK)[https://sdk.operatorframework.io/].
+The engine operator contains all custom controllers and resources that are used within Das SCHIFF. It's built using the [Operator SDK](https://sdk.operatorframework.io/).
 
 ## Building
 
