@@ -13,6 +13,8 @@ import (
 	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/system"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/controllers"
+	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/ipam/infoblox"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -20,9 +22,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/controllers"
-	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/ipam/mock"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -72,7 +71,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("VSphereMachine"),
 		Scheme: mgr.GetScheme(),
-		IPAM:   &mock.Manager{},
+		IPAM:   &infoblox.Manager{},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VSphereMachine")
 		os.Exit(1)
