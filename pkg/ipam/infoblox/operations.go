@@ -71,7 +71,7 @@ func (m *Manager) ReleaseIP(deviceName, networkView string, subnet *net.IPNet) e
 	defer conn.Logout()
 	objMgr := ibclient.NewObjectManager(conn, "myclient", "")
 	objMgr.OmitCloudAttrs = true // Needs to be set for on-prem version of Infoblox
-	_, err = objMgr.ReleaseIP(networkView, string(subnet.IP)+"/"+string(subnet.Mask), "", "")
+	_, err = objMgr.ReleaseIP(networkView, subnet.String(), "", "")
 	if err != nil {
 		log.Error("Could not release IP for cluster")
 		return err
