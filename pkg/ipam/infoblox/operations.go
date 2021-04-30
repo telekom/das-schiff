@@ -5,34 +5,19 @@ import (
 
 	ibclient "github.com/infobloxopen/infoblox-go-client"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type Manager struct{}
 
-// Infoblox client config structure
-type InfobloxConfig struct {
-	Host     string `mapstructure:"HOST"`
-	Version  string `mapstructure:"WAPI_VERSION"`
-	Port     string `mapstructure:"PORT"`
-	Username string `mapstructure:"INFOBLOX_USERNAME"`
-	Password string `mapstructure:"INFOBLOX_PASSWORD"`
-}
-
 // Initializes a connection to Infoblox
 func (m *Manager) getIBConnector() (*ibclient.Connector, error) {
-
-	// Define Infoblox configuration file and path
-	config, err := LoadConfig("./config/", "infoblox", "env")
-	if err != nil {
-		log.Error("Could not load config file", err)
-	}
-
 	hostConfig := ibclient.HostConfig{
-		Host:     config.Host,
-		Version:  config.Version,
-		Port:     config.Port,
-		Username: config.Username,
-		Password: config.Password,
+		Host:     viper.GetString("ipam.infoblox.host"),
+		Version:  viper.GetString("ipam.infoblox.wapi_version"),
+		Port:     viper.GetString("ipam.infoblox.port"),
+		Username: viper.GetString("ipam.infoblox.username"),
+		Password: viper.GetString("ipam.infoblox.password"),
 	}
 
 	transportConfig := ibclient.NewTransportConfig("false", 15, 10)
