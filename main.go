@@ -10,6 +10,7 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
+	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/config"
 	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/system"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
@@ -43,11 +44,13 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
+	var configFile string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&configFile, "config", "", "An optional path to the configuration file.")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -55,6 +58,9 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	setupLog.Info("loading configuration", "explicit path", configFile)
+	config.Load(configFile)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
