@@ -42,9 +42,8 @@ func (m *Manager) GetOrAllocateIP(deviceName, networkView string, subnet *net.IP
 	defer conn.Logout()
 	objMgr := ibclient.NewObjectManager(conn, "myclient", "")
 	objMgr.OmitCloudAttrs = true // Needs to be set for on-prem version of Infoblox
-	cidr := string(subnet.IP) + "/" + string(subnet.Mask)
 	ea := make(ibclient.EA)
-	fixedAddress, err := objMgr.GetFixedAddress(networkView, cidr, "", "")
+	fixedAddress, err := objMgr.GetFixedAddress(networkView, subnet.String(), "", "")
 	if err != nil {
 		log.Error(err, "Could not get assigned IP address for cluster")
 	}
@@ -54,7 +53,7 @@ func (m *Manager) GetOrAllocateIP(deviceName, networkView string, subnet *net.IP
 	} else {
 		log.Info("No IP allocated to cluster, allocating IP")
 		// AllocateIP assigns first available IP to  the cluster.
-		allocatedIP, err := objMgr.AllocateIP(networkView, cidr, "", "", deviceName, ea)
+		allocatedIP, err := objMgr.AllocateIP(networkView, subnet.String(), "", "", deviceName, ea)
 		if err != nil {
 			log.Error(err, "Could not allocate IP for cluster")
 		}
