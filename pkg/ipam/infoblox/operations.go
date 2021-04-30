@@ -49,7 +49,7 @@ func (m *Manager) GetOrAllocateIP(deviceName, networkView string, subnet *net.IP
 	}
 	if fixedAddress != nil {
 		log.Info("IP Address already assigned to cluster")
-		return (net.IP)(fixedAddress.IPAddress), err
+		return net.ParseIP(fixedAddress.IPAddress), err
 	} else {
 		log.Info("No IP allocated to cluster, allocating IP")
 		// AllocateIP assigns first available IP to  the cluster.
@@ -58,7 +58,7 @@ func (m *Manager) GetOrAllocateIP(deviceName, networkView string, subnet *net.IP
 			log.Error(err, "Could not allocate IP for cluster")
 		}
 		log.Info("IP address allocated successfully to cluster")
-		return (net.IP)(allocatedIP.IPAddress), err
+		return net.ParseIP(allocatedIP.IPAddress), err
 	}
 }
 
