@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/cluster-api-provider-vsphere/api/v1alpha3"
+	capiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -74,6 +75,8 @@ var _ = BeforeSuite(func() {
 	Expect(cfg).NotTo(BeNil())
 
 	err = v1alpha3.AddToScheme(scheme.Scheme)
+	Expect(err).ToNot(HaveOccurred())
+	err = capiv1alpha3.AddToScheme(scheme.Scheme)
 	Expect(err).ToNot(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 

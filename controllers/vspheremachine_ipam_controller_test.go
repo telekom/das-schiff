@@ -9,6 +9,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/cluster-api-provider-vsphere/api/v1alpha3"
+	capiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -58,10 +59,7 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 		Expect(k8sClient.Delete(context.Background(), &v1alpha3.VSphereMachine{ObjectMeta: meta})).To(Succeed())
 		Eventually(func() bool {
 			err := k8sClient.Get(context.Background(), NamespacedName, &v1alpha3.VSphereMachine{})
-			if err != nil {
-				return true
-			}
-			return false
+			return err != nil
 		}, timeout, interval).Should(BeTrue())
 	})
 
@@ -154,15 +152,81 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 			Expect(createdMachine.Finalizers).NotTo(ContainElement(finalizer))
 			Expect(called).To(BeFalse(), "should not call ipam")
 		})
+
+		It("fetches the annotations of the owning Machine if it doesn't have them", func() {
+			ctx := context.Background()
+			allocated := false
+			ipamManager.Callback = func(t, id, networkView string, subnet *net.IPNet) {
+				ctrl.Log.Info("ipam callback", "deviceName", id, "networkView", networkView, "subnet", subnet.String())
+				if id != MachineName || networkView != NetworkView || subnet.String() != TestSubnet.String() {
+					return
+				}
+				if t == "GetOrAllocate" {
+					allocated = true
+				}
+			}
+
+			machine := &capiv1alpha3.Machine{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      MachineName,
+					Namespace: Namespace,
+					Annotations: map[string]string{
+						networkNameAnnotation:         NetworkName,
+						infobloxNetworkViewAnnotation: NetworkView,
+						subnetAnnotation:              TestSubnet.String(),
+						clusterNameLabel:              ClusterName,
+					},
+				},
+				Spec: capiv1alpha3.MachineSpec{
+					ClusterName: ClusterName,
+				},
+			}
+			Expect(k8sClient.Create(ctx, machine)).To(Succeed())
+			vmachine := &v1alpha3.VSphereMachine{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      MachineName,
+					Namespace: Namespace,
+					Labels: map[string]string{
+						clusterNameLabel: ClusterName,
+					},
+					OwnerReferences: []v1.OwnerReference{
+						{APIVersion: "cluster.x-k8s.io/v1alpha3", Kind: "Machine", Name: machine.ObjectMeta.Name, UID: machine.ObjectMeta.UID},
+					},
+				},
+				Spec: v1alpha3.VSphereMachineSpec{
+					VirtualMachineCloneSpec: v1alpha3.VirtualMachineCloneSpec{
+						Template: Template,
+						Network:  v1alpha3.NetworkSpec{Devices: []v1alpha3.NetworkDeviceSpec{{NetworkName: NetworkName}}},
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, vmachine)).To(Succeed())
+			createdMachine := &v1alpha3.VSphereMachine{}
+			// wait for creation
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, NamespacedName, createdMachine)
+				if err != nil {
+					return false
+				}
+				if len(createdMachine.Spec.Network.Devices) < 1 {
+					return false
+				}
+				dev := createdMachine.Spec.Network.Devices[0]
+				if len(dev.IPAddrs) < 1 || !net.ParseIP(dev.IPAddrs[0]).Equal(net.IPv4zero) {
+					return false
+				}
+				return true
+			}, timeout, interval).Should(BeTrue())
+			Expect(allocated).To(BeTrue(), "should allocate the ip in ipam")
+
+			Expect(k8sClient.Delete(ctx, machine)).To(Succeed())
+		})
 	})
 })
 
 func waitForObject(ctx context.Context, key types.NamespacedName, obj client.Object) {
 	Eventually(func() bool {
 		err := k8sClient.Get(ctx, key, obj)
-		if err != nil {
-			return false
-		}
-		return true
+		return err == nil
 	}, timeout, interval).Should(BeTrue())
 }

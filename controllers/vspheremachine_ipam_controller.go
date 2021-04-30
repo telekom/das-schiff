@@ -7,13 +7,17 @@ package controllers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 
 	"github.com/go-logr/logr"
 	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/ipam"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/cluster-api-provider-vsphere/api/v1alpha3"
+	capiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -32,6 +36,9 @@ const finalizer = "ipam.schiff.telekom.de/DeallocateMachineIP"
 const networkNameAnnotation = "ipam.schiff.telekom.de/NetworkName"
 const subnetAnnotation = "ipam.schiff.telekom.de/Subnet"
 const infobloxNetworkViewAnnotation = "ipam.schiff.telekom.de/InfobloxNetworkView"
+
+// var errMissingParam = errors.New("object is missing required parameters")
+type errMissingParam error
 
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines/status,verbs=get
@@ -60,20 +67,14 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		log.Error(err, "cannot get cluster name")
 		return ctrl.Result{}, err
 	}
-	subnetAnno, ok := vSphereMachine.Annotations[subnetAnnotation]
-	if !ok {
-		log.V(2).Info("missing subnet annotation")
-		return ctrl.Result{}, nil
-	}
-	_, subnet, err := net.ParseCIDR(subnetAnno)
+
+	subnet, networkName, ibNetworkView, err := r.getParams(ctx, vSphereMachine.ObjectMeta)
 	if err != nil {
-		log.Error(err, "failed to parse subnet CIDR", "subnet", subnetAnno)
+		if err, ok := err.(errMissingParam); ok {
+			log.V(2).Info(err.Error())
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, err
-	}
-	ibNetworkView, ok := vSphereMachine.Annotations[infobloxNetworkViewAnnotation]
-	if !ok {
-		log.V(2).Info("missing network zone annotation")
-		return ctrl.Result{}, nil
 	}
 
 	// Deallocate the IP if the Machine is marked for deletion
@@ -98,12 +99,6 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		}
 
 		log.V(4).Info("machine deleted, ignoring")
-		return ctrl.Result{}, nil
-	}
-
-	networkName, ok := vSphereMachine.Annotations[networkNameAnnotation]
-	if !ok {
-		log.V(2).Info("missing network name annotation")
 		return ctrl.Result{}, nil
 	}
 
@@ -166,6 +161,49 @@ func getDeviceByNetworkName(devices []v1alpha3.NetworkDeviceSpec, name string) (
 		}
 	}
 	return v1alpha3.NetworkDeviceSpec{}, -1
+}
+
+func getParamsFromAnnotations(annotations map[string]string) (subnet *net.IPNet, networkName, ibNetworkView string, err error) {
+	subnetAnno, ok := annotations[subnetAnnotation]
+	if !ok {
+		err = errMissingParam(errors.New("missing subnet annotation"))
+		return
+	}
+	_, subnet, err = net.ParseCIDR(subnetAnno)
+	if err != nil {
+		err = fmt.Errorf("failed to parse subnet CIDR: %v", err)
+		return
+	}
+
+	ibNetworkView, ok = annotations[infobloxNetworkViewAnnotation]
+	if !ok {
+		err = errMissingParam(errors.New("missing network zone annotation"))
+		return
+	}
+
+	networkName, ok = annotations[networkNameAnnotation]
+	if !ok {
+		err = errMissingParam(errors.New("missing network name annotation"))
+		return
+	}
+	return
+}
+
+func (r *VSphereMachineIPAMReconciler) getParams(ctx context.Context, metadata v1.ObjectMeta) (subnet *net.IPNet, networkName, ibNetworkView string, err error) {
+	subnet, networkName, ibNetworkView, err = getParamsFromAnnotations(metadata.Annotations)
+	if _, ok := err.(errMissingParam); ok {
+		for _, ownerRef := range metadata.OwnerReferences {
+			if ownerRef.Kind == "Machine" {
+				machine := &capiv1alpha3.Machine{}
+				err = r.Get(ctx, types.NamespacedName{Namespace: metadata.GetNamespace(), Name: ownerRef.Name}, machine)
+				if err != nil {
+					return
+				}
+				return getParamsFromAnnotations(machine.Annotations)
+			}
+		}
+	}
+	return
 }
 
 // SetupWithManager sets up the controller with the Manager.
