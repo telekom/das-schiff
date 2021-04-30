@@ -24,7 +24,7 @@ func (m *Manager) getIBConnector() (*ibclient.Connector, error) {
 	// Define Infoblox configuration file and path
 	config, err := LoadConfig("./config/", "infoblox", "env")
 	if err != nil {
-		log.Error(err, "Could not load config file")
+		log.Error("Could not load config file", err)
 	}
 
 	hostConfig := ibclient.HostConfig{
