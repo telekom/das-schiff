@@ -106,7 +106,7 @@ Description of the loop on example of workload cluster creation:
 
 Same loop is used for any change in the running clusters.
 
-### Das Schiff leyered repo
+### Das Schiff layered repo
 
 Main logic of Das Schiff engine loops is actually built in the layered structure of its Git repo.
 
