@@ -1,6 +1,5 @@
-<h1 align="center">
-    Telekom Das-Schiff
-</h1>
+
+<p align="center"><img src="images/das-schiff-logo.png" align="center"></p>
 
 <p align="center">
     <a href="https://github.com/telekom/das-schiff/commits/" title="Last Commit"><img src="https://img.shields.io/github/last-commit/telekom/das-schiff?style=flat"></a>
@@ -8,25 +7,345 @@
     <a href="https://github.com/telekom/das-schiff/blob/master/LICENSE" title="License"><img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat"></a>
 </p>
 
-<p align="center">
-  <a href="#development">Development</a> •
-  <a href="#documentation">Documentation</a> •
-  <a href="#support-and-feedback">Support</a> •
-  <a href="#how-to-contribute">Contribute</a> •
-  <a href="#contributors">Contributors</a> •
-  <a href="#licensing">Licensing</a>
-</p>
+# Das Schiff
 
-Das Schiff is managed Kubernetes of <a href="https://de.wikipedia.org/wiki/Telekom_Deutschland#Deutsche_Telekom_Technik_GmbH"><b>Deutsche Telekom Technik</b></a> which combines <a href="https://fluxcd.io/"><b>GitOps</b></a> and <a href="https://cluster-api.sigs.k8s.io/introduction.html"><b>Cluster API</b></a> to provide end-to-end, declarative, management of large number of clusters. Most of our external work is done in engagement with upstream projects. However some parts, specific for Das Schif, that do not belong natively to other projects, might be open-sourced here once they are ready.
+## This is still work in progress. Please watch this repo for updates soon.
 
-In the mean time Das Schiff overview and demo could be seen here: <a href="https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251" target="_blank"><b>Cluster API Office Hours Apr 15th, 2020</b></a>
+#### Useful links
 
-We have also talked about Das Schiff in several podcasts:<br>
-- <a href="https://semaphoreci.com/blog/cloud-native-adoption-vuk-gojnic" tarket="_blank"><b>Semaphore Uncut with Darko Fabijan</b></a>
-- <a href="https://www.weave.works/blog/kubernetes-at-deutsche-telekom-gitops-at-the-edge" tarket="_blank"><b>Art of Modern Ops with Cornelia Davis</b></a>
+- [Licensing](#licensing)
+- Das Schiff Pure Metal - our approach to dynamic bare metal cluster provisioning
+- Das Schiff Liquid Metal - development to optimize Pure Metal for edge and far edge deployments with use of microVM technology.
 
-#### -- Das Schiff Crew
+#### Some public presentations
+- [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)
+- [Talking about Das Schiff in Semaphore Uncut with Darko Fabijan](https://semaphoreci.com/blog/cloud-native-adoption-vuk-gojnic)
+- [Talking about Das Sciff in Art of Modern Ops with Cornelia Davis](https://www.weave.works/blog/kubernetes-at-deutsche-telekom-gitops-at-the-edge)
 
+## What is Das Schiff?
+
+Das Schiff is a fully open-source based engine, created and used in production in <a href="https://de.wikipedia.org/wiki/Telekom_Deutschland#Deutsche_Telekom_Technik_GmbH"><b>Deutsche Telekom Technik</b></a> to offer distributed Kubernetes Cluster-as-a-Service (CaaS) at scale, on-prem, on top of VMs or bare-metal servers, to the wide variety of appilcations. 
+
+### Our Challenge
+
+[Telekom Deutschland](https://de.wikipedia.org/wiki/Telekom_Deutschland) is leading integrated communications provider in Germany, part of [Deutsche Telekom Group](https://www.telekom.com/en). Deutsche Telekom Technik is a network technology (NT)department of Telekom Deutschland in charge of providing infrastructure to deliver communication services via its 17.5m fixed line connections and to 48.8m mobile customers.
+
+Similar as in any telco, NT departments do not run typical IT workloads. Instead of it we run networks, network functions, service platforms and associated managment systems. Modern examples of those are 5G core, ORAN DU, remote UPF, BNG, IMS, IPTV etc. Large portion of those is geographically distributed due to the nature of communications technology (e.g. access node or mobile tower). If we have full picture in mind incl. far edge locations we are talking about couple of thousands locationsin Germany.
+
+As all of those workloads are rapidly transforming towards cloud native architecture, thus requiring a Kubernetes cluster(s) to run in them. With that our challenge became following: *"How to manage thousands of Kubernetes clusters accross hundreds of locations, on top of bare-metal servers or VMs, with small, highly skilled SRE team and using open-source software only?"*
+
+### Our Answer
+
+Das Schiff - the engine for establishment and supervision of autonomous cloud native infrastructure (self)managed in a GitOps loop.
+
+#### Das Schiff Features
+
+* Multi-cluster (main basis for multi-tenantcy)
+* Multi-distribution (currently upstream K8S and EKS-D, but can support any K8s distro installable via kubeadm) 
+* Multi-site (core, edge, far edge)
+* Infrastructure independent (supports bare-metal as well as local IaaS, but can support public cloud as well)
+* (Self)managed in a GitOps loop
+  * Using Git (well known tool as single state of truth)
+  * Declarative (intent based)
+  * Immutable (prevents config drift)
+  * Auditable (trail via Git history), imutable, Git for single source of truth)
+
+#### What is needed to run Das Schiff?
+
+To run Das Schiff you need reliable Git platform (we use GitLab), Container and Helm charts Registry (we use Harbor) and at least one of two:
+- For bare-metal K8s clusters: locations with pools of bare-metal servers with Redfish based IPMI and with their BMC ports connected to a network that you can reach.
+- For VM based K8s clusters: IaaS consuimable via an API (e.g. vSphere, AWS, Azure, OpenStack etc.) that you can reach.
+
+#### Can Das Schiff be used outside of Deutsche Telekom Technik?
+
+We believe that best platforms are open. The success of Kubernetes and several other examples from the past confirms that. We believe that now is the time and chance for telcos to build on Kubernetes as ["The platform for building platforms](https://twitter.com/kelseyhightower/status/935252923721793536?lang=en) and adopt modern devops practices of "continous everyhing" in production of its services. This requires the industry to adopt best practices in that area move away from traditional "systems integrated" approach. 
+
+Therefore, we are working together with our friends from [Weaveworks - original creators of GitOps movement](https://www.weave.works/) to make Das Schiff generalized and consumable by anybody who have need to manage large number of Kubernetes clusters distributed accross many locations. Primary goal is to create open, composable and flexible 5G/telco cloud native platform for production. However it could be useful for anyone who needs to manage fleets of distributed Kubernetes clusters such as retail, railway, industrial networks etc. The initiative is currently code-named **K5G** and we would be happy to join forces with all interested parties. While we are working on **K5G** feel free to engage in the [discussions](discussions).
+
+#### Is Das Schiff / K5G part of any industry initiative?
+
+[CNCF CNF-WG](https://github.com/cncf/cnf-wg) is an attempt to create momentum for transforming of telco / CNF production and we are actively contributing to it from the platform devops perspective.
+
+## How Das Schiff works?
+
+Das Schiff relies on following core building blocks:
+* [Cluster API](https://github.com/kubernetes-sigs/cluster-api) (CAPI) and its providers (currently [CAPV](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere) and [Metal3](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere))
+* [FluxCD v2](https://github.com/fluxcd/flux2) (most notably its Kustomize and Helm controllers)
+* Das Schiff layered git repo [layout](#Das-Schiff-layered-repo) 
+* [SOPS](https://github.com/mozilla/sops) for the secrets stored in Git
+
+One CAPI management cluster manages workload clusters in multiple local or remote sites. For that it deploys multiple CAPI infrastructure providers and their instances.
+
+<p align="center"><img src="images/capi-multi-site.png" align="center"></p>
+
+Depending on the deployment scenario there can multiple management clusters that manage workloads in multiple regions or environments.
+
+Definition of entire infrastructure including workload clusters is stored in two main Git repos. 
+
+<p align="left"><img src="images/infrastructure-repo.png" align="center"></p>
+
+* `cluster-definitions` repo contains CAPI manifests that define the workload clusters and is used by management cluster for autonomous bootstrapping of workload clusters (CaaS).
+
+* `cluster-components` repo contains descriptions and configurations of applications that need to run in workload clusters as standard components (PaaS - Prometheus, Logstash, RBAC) and is used by workload clusters to set themselves up autonomously.  
+
+Git is used as main management tool.
+
+Each management cluster has FluxCD v2 deployed and configured to watch a `cluster-definitions` repo related to the that management cluster. As the part of bootstrapping of workload clusters, each cluster comes equipped with FluxCD v2 that points to `cluster-components` repo relevant for that cluster.  
+
+### Das Schiff loop
+
+The main loop that illustrates how Das Schiff combines different building blocks looks as depicted below.
+
+<p align="left"><img src="images/das-schiff-loop.png" width=600 align="center"></p>
+
+Description of the loop on example of workload cluster creation:
+1. Admin pushes definitions of the clusters and components to the repos
+2. FluxCD in management cluster detects the change in desired state and the cluster. In this example it creates corresponding CAPI objects and bootstrap Kustomizations.
+3. CAPI objects do their job and in communication with target infrastructure create a tenant cluster. As soon as that cluster is available Bootstrap Kustomizations deploy and configure CNI and FluxCD in it and set it to watch its own config repo.
+4. FluxCD in new tenant cluster starts reconciling the tenant cluster with desired state described in Git. After short time the cluster reaches desired state which is than maintained by the loop.
+
+Same loop is used for any change in the running clusters.
+
+### Das Schiff leyered repo
+
+Main logic of Das Schiff engine loops is actually built in the layered structure of its Git repo.
+
+Here is the structure of `cluster-definitions` repo:
+
+```bash
+cluster-definitions 
+|   
++---schiff-management-cluster-x # Definitions of workload clusters this management cluster
+|   |
+|   +---self-definitions # Each management custer manages itself as well. These definitions are stored here. 
+|   |       Cluster.yml
+|   |       Kubeadm-config.yml
+|   |       machinedeployment-0.yml
+|   |       machinehealthcheck.yml
+|   |       MachineTemplates.yml
+|   |
+|   \---sites # Each management cluster manages multiple sites
+|       +---vsphere-site-1 # Here are definitons of clusters in one site
+|       |   +---customer_A # Each site holds clusters of multiple customers. Customer clusters are grouped per site here.
+|       |   |   \---customer_A-workload-cluster-1 # Here are the definitions of one workload cluster
+|       |   |       |   bootstrap-kustomisation.yaml # Defines initial components in workload cluster: FluxCD and CNI
+|       |   |       |   Cluster.yml # All below are standard definitions of CAPI and Infrastructure Provider objects
+|       |   |       |   external-ccm.yaml # ^^^
+|       |   |       |   Kubeadm-config.yml # ^^^
+|       |   |       |   machinedeployment-0.yml # ^^^
+|       |   |       |   machinehealthcheck.yml # ^^^
+|       |   |       |   MachineTemplates.yml # ^^^
+|       |   |       |
+|       |   |       \---secrets
+|       |   |               external-ccm-secret.yaml
+|       |   |
+|       |   \---customer_B
+|       |       \---customer_B-workload-cluster-1
+|       |           |   # Same structure as above
+|       |
+|       |
+|       \---baremetal-site-1
+|           \---customer_A
+|               \---customer_A-workload-cluster-1
+|                   |   # Same structure as above
+|
+|
+\---schiff-management-cluster-y # Here the domain of second management cluster starts
+    +---self-definitions
+    |
+    \---sites
+        \-- ... # Same structure as above
+```
+
+Beside applying standard CAPI manifests incl. manifests of infrastructure providers, FluxCD in management cluster creates set of so called bootstrap Kustomizations. They represent the link between `cluster-definitions` and `cluster-components` repositories. Bootstrap Kustomizations are responsible for deploying of FluxCD and CNI as defined in `cluster-definitions` repo into a newly created workload cluster in order to hand the control to it. 
+
+At the beginning the bootstrap Kustomizations are failing as the workload cluster is not yet there. As soon as workload cluster is available they will reconcile it and the loop will continue. After that the sole role of these Kustomizations is to repair / re-apply FluxCD in workload cluster if it fails for any reason.
+
+The sample bootstrap-kustiomization.yaml is given below.
+
+```yaml
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: boostrap-location-1-site-1-customer_A-workload-cluster-1-cluster
+  namespace: location-1-site-1
+spec:
+  interval: 5m
+  path: "./locations/location-1/site-1/customer_A-workload-cluster-1"
+  prune: false
+  suspend: false
+  sourceRef:
+    kind: GitRepository
+    name: locations-location-1-site-1-main
+    namespace: schiff-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg-schiff-cp
+  timeout: 2m
+  kubeConfig:
+    secretRef:
+      name: customer_A-workload-cluster-1-kubeconfig
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: boostrap-location-1-site-1-customer_A-workload-cluster-1-default-namespaces
+  namespace: location-1-site-1
+spec:
+  interval: 5m
+  path: "./default/components"
+  prune: false
+  suspend: false
+  sourceRef:
+    kind: GitRepository
+    name: locations-location-1-site-1-main
+    namespace: schiff-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg-schiff-cp
+  timeout: 2m
+  kubeConfig:
+    secretRef:
+      name: customer_A-workload-cluster-1-kubeconfig
+```
+
+The `cluster-components` repository has layered structure that is used to create overlayed Kustomizations relevant for particular cluster that get applied. 
+
+The Git directories which are configured in these Kustomizations contain mostly the following:
+* Plain manifests for namespaces, CNI, RBAC etc. 
+* HelmReleases for the components that are installed in the cluster (e.g. Prometheus, CSI etc.)
+* ConfigMaps with values for HelmReleases
+* Further Kustomizations
+* GitRepositories, HelmRepositories
+
+The Kustomizations are applied in the order from most general contained in `default/components` which is valid for all clusters, up to most specific for the particular cluster which is in `locations`.
+
+In this way we can manage groups of clusters in quite granular way:
+* Default - for all clusters under management
+* Customers - for all clusters of an internal customers in all or all in particular environment
+* Environments - for all clusters in an environment like Dev, Test, Reference or Production
+* Providers - for all clusters created via particular CAPI provider or all in particular environment
+* Network zones - for all clusters in an network serment (important since CSP networks are usually very segmented and diverse)
+* Locations - for all cluster in particular location & site or for individual clusters.
+
+Here is corresponding structure of `cluster-components` repo:
+
+```bash
+cluster-components
++---customers # Defaults per customers and environments
+|   +---customer_A
+|   |   +---default # Defaults for customer_A for all environments
+|   |   |   +---configmaps
+|   |   |   +---gitrepositories
+|   |   |   +---kustomizations
+|   |   |   \---namespaces
+|   |   +---prd # Specific config for customer_A per environment
+|   |   +---ref
+|   |   \---tst
+|   \---customer_B
+|       ... # Same as above
++---default # General defaults valid for all customers and environments
+|   \---components
+|       +---core
+|       |   +---clusterroles
+|       |   +---configmaps
+|       |   \---namespaces
+|       \---monitoring
+|           +---configmaps
+|           +---grafana
+|           |   +---dashboards
+|           |   |   +---flux-system
+|           |   |   +---kube-system
+|           |   |   \---monitoring-system
+|           |   \---datasources
+|           +---namespaces
+|           +---prometheus
+|           |   +---alerts
+|           |   +---rules
+|           |   \---servicemonitors
+|           \---services
++---environments # General defaults per environment
+|   +---dev
+|   |   +---components
+|   |   |   +---core
+|   |   |   |   +---configmaps
+|   |   |   |   \---helmreleases
+|   |   |   \---monitoring
+|   |   |       +---crds
+|   |   |       |   +---grafana-operator
+|   |   |       |   |   \---crds
+|   |   |       |   \---prometheus-operator
+|   |   |       |       \---crds
+|   |   |       \---helmreleases
+|   |   +---configmaps
+|   |   +---helmrepositories
+|   |   \---podmonitors
+|   +---prd
+|   |   ... # Same as above
+|   +---ref
+|   |   ... # Same as above
+|   \---tst
+|       ... # Same as above
++---locations # Cluster specific configs
+|   +---location-1
+|   |   \---site-1
+|   |       +---customer_A-workload-cluster-1
+|   |       |   +---cni
+|   |       |   |   +---clusterrolebindings
+|   |       |   |   +---clusterroles
+|   |       |   |   +---configmaps
+|   |       |   |   +---crds
+|   |       |   |   \---serviceaccounts
+|   |       |   +---configmaps
+|   |       |   +---gitrepositories
+|   |       |   +---kustomizations
+|   |       |   \---secrets
+|   |       \---customer_B-workload-cluster-1
+|   |           ... # Same as above
+|   \---location-2
+|       ... # Same as above
++---network-zones
+|   +---environment-defaults # Network related defaults per environment
+|   |   +---dev
+|   |   |   +---clusterrolebindings
+|   |   |   +---clusterroles
+|   |   |   +---crds
+|   |   |   +---networkpolicies
+|   |   |   +---serviceaccounts
+|   |   |   \---services
+|   |   +---prd
+|   |   |   ... # Same as above
+|   |   +---ref
+|   |   |   ... # Same as above
+|   |   \---tst
+|   |       ...
+|   +---network-segment-1 # Specific config for network segment 1
+|   |   ... # Same as above
+|   \---network-segment-2
+|       ... # Same as above
+\---providers # CAPI provider defaults and specific configs per environment
+    +---default
+    +---metal3
+    |   +---default
+    |   |   +---configmaps
+    |   |   \---namespaces
+    |   +---dev
+    |   |   \---helmreleases
+    |   +---prd
+    |   |   \---helmreleases
+    |   +---ref
+    |   |   +---crds
+    |   |   +---helmreleases
+    |   |   \---helmrepositories
+    |   \---tst
+    |       \---helmreleases
+    \---vsphere
+        ... # Same as above
+
+```
 
 ## Licensing
 
