@@ -40,11 +40,11 @@ Das Schiff - the engine for establishment and supervision of autonomous cloud na
 
 #### Das Schiff Features
 
-* Multi-cluster (main basis for multi-tenantcy)
-* Multi-distribution (currently upstream K8S and EKS-D, but can support any K8s distro installable via kubeadm) 
-* Multi-site (core, edge, far edge)
-* Infrastructure independent (supports bare-metal as well as local IaaS, but can support public cloud as well)
-* (Self)managed in a GitOps loop
+* **Multi-cluster** (main basis and our approach to multi-tenantcy)
+* **Multi-distribution** (currently upstream K8S and EKS-D, but can support any K8s distro installable via kubeadm) 
+* **Multi-site** (core, edge, far edge)
+* **Infrastructure independent** (supports bare-metal as well as local IaaS, but can support public cloud as well)
+* **(Self)managed in a GitOps loop**
   * Using Git (well known tool as single state of truth)
   * Declarative (intent based)
   * Immutable (prevents config drift)
@@ -52,9 +52,9 @@ Das Schiff - the engine for establishment and supervision of autonomous cloud na
 
 #### What is needed to run Das Schiff?
 
-To run Das Schiff you need reliable Git platform (we use GitLab), Container and Helm charts Registry (we use Harbor) and at least one of two:
-- For bare-metal K8s clusters: locations with pools of bare-metal servers with Redfish based IPMI and with their BMC ports connected to a network that you can reach.
-- For VM based K8s clusters: IaaS consuimable via an API (e.g. vSphere, AWS, Azure, OpenStack etc.) that you can reach.
+To run Das Schiff you need reliable **Git platform** (we use GitLab), **Container and Helm charts Registry** (we use Harbor) and at least one of two:
+- **For bare-metal K8s clusters**: locations with pools of bare-metal servers with Redfish based IPMI and with their BMC ports connected to a network that you can reach.
+- **For VM based K8s clusters**: IaaS consuimable via an API (e.g. vSphere, AWS, Azure, OpenStack etc.) that you can reach.
 
 #### Can Das Schiff be used outside of Deutsche Telekom Technik?
 
@@ -71,7 +71,7 @@ Therefore, we are working together with our friends from [Weaveworks - original 
 Das Schiff relies on following core building blocks:
 * [Cluster API](https://github.com/kubernetes-sigs/cluster-api) (CAPI) and its providers (currently [CAPV](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere) and [Metal3](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere))
 * [FluxCD v2](https://github.com/fluxcd/flux2) (most notably its Kustomize and Helm controllers)
-* Das Schiff layered git repo [layout](#Das-Schiff-layered-repo) 
+* Das Schiff layered git repo [layout](#das-schiff-layered-repo) 
 * [SOPS](https://github.com/mozilla/sops) for the secrets stored in Git
 
 One CAPI management cluster manages workload clusters in multiple local or remote sites. For that it deploys multiple CAPI infrastructure providers and their instances.
