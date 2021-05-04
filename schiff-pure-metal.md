@@ -1,7 +1,7 @@
 # Das Schiff Pure Metal
 
 ## Introduction
-This document describes Das Schiff Pure Metal - our approach to dynamically manage multiple bare-metal Kubernetes clusters using [Das Schiff Engine](README) and only bare-metal servers
+This document describes Das Schiff Pure Metal - our approach to dynamically manage multiple bare-metal Kubernetes clusters using [Das Schiff Engine](README.md) and only bare-metal servers
 
 ## Motivation
 
@@ -34,7 +34,7 @@ The typical setup is illustrated on the picture below:
 
 <p align="center"><img src="images/schiff-pure-metal-illustration.png" align="center"></p>
 
-The pool of servers is managed by [GitOps loop](README#das-schiff-loop) of Das Schiff Management cluster for sole purpose of creating and maintaining bare-metal customer clusters. The picture shows situation with one server pool in one location that is hosting two clustomer clusters - cluster A and cluster B. The rest of the servers in the pool are free for creation of other clusters, expansion of existing clusters as well as reserve for failover and lifecycle management purposes. 
+The pool of servers is managed by [GitOps loop](README.md#das-schiff-loop) of Das Schiff Management cluster for sole purpose of creating and maintaining bare-metal customer clusters. The picture shows situation with one server pool in one location that is hosting two clustomer clusters - cluster A and cluster B. The rest of the servers in the pool are free for creation of other clusters, expansion of existing clusters as well as reserve for failover and lifecycle management purposes. 
 
 
 ## Use cases for Das Schiff Pure Metal
