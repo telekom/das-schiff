@@ -14,7 +14,7 @@
 #### Useful links
 
 - [Licensing](#licensing)
-- [Das Schiff Pure Metal](schiff-pure-metal) - our approach to dynamic bare metal cluster provisioning
+- [Das Schiff Pure Metal](schiff-pure-metal.md) - our approach to dynamic bare metal cluster provisioning
 - [Das Schiff Liquid Metal](schiff-liquid-metal) - development to optimize Pure Metal for edge and far edge deployments with use of microVM technology.
 
 ## What is Das Schiff?
