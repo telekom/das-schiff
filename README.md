@@ -14,13 +14,8 @@
 #### Useful links
 
 - [Licensing](#licensing)
-- Das Schiff Pure Metal - our approach to dynamic bare metal cluster provisioning
-- Das Schiff Liquid Metal - development to optimize Pure Metal for edge and far edge deployments with use of microVM technology.
-
-#### Some public presentations
-- [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)
-- [Talking about Das Schiff in Semaphore Uncut with Darko Fabijan](https://semaphoreci.com/blog/cloud-native-adoption-vuk-gojnic)
-- [Talking about Das Sciff in Art of Modern Ops with Cornelia Davis](https://www.weave.works/blog/kubernetes-at-deutsche-telekom-gitops-at-the-edge)
+- [Das Schiff Pure Metal](schiff-pure-metal) - our approach to dynamic bare metal cluster provisioning
+- [Das Schiff Liquid Metal](schiff-liquid-metal) - development to optimize Pure Metal for edge and far edge deployments with use of microVM technology.
 
 ## What is Das Schiff?
 
@@ -346,6 +341,10 @@ cluster-components
         ... # Same as above
 
 ```
+## Some public presentations
+- [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)
+- [Talking about Das Schiff in Semaphore Uncut with Darko Fabijan](https://semaphoreci.com/blog/cloud-native-adoption-vuk-gojnic)
+- [Talking about Das Sciff in Art of Modern Ops with Cornelia Davis](https://www.weave.works/blog/kubernetes-at-deutsche-telekom-gitops-at-the-edge)
 
 ## Licensing
 
