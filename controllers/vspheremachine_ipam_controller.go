@@ -124,7 +124,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	exists := false
 	for _, ip := range dev.IPAddrs {
-		if net.ParseIP(ip).Equal(desiredIP) {
+		if mIP, mSubnet, err := net.ParseCIDR(ip); err == nil && mIP.Equal(desiredIP) && mSubnet.Mask.String() == subnet.Mask.String() {
 			exists = true
 			break
 		}
@@ -133,8 +133,10 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	changed := false
 
 	if !exists {
-		log.WithValues("ipAddress", desiredIP.String()).Info("adding allocated ip address to machine")
-		vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs = append(dev.IPAddrs, desiredIP.String())
+		prefix, _ := subnet.Mask.Size()
+		cidr := fmt.Sprintf("%v/%v", desiredIP.String(), prefix)
+		log.WithValues("ipAddress", cidr).Info("adding allocated ip address to machine")
+		vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs = append(dev.IPAddrs, cidr)
 		changed = true
 	}
 

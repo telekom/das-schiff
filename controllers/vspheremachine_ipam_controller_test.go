@@ -99,14 +99,7 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 				if err != nil {
 					return false
 				}
-				if len(createdMachine.Spec.Network.Devices) < 1 {
-					return false
-				}
-				dev := createdMachine.Spec.Network.Devices[0]
-				if len(dev.IPAddrs) < 1 || !net.ParseIP(dev.IPAddrs[0]).Equal(net.IPv4zero) {
-					return false
-				}
-				return true
+				return checkNetworkDevices(createdMachine.Spec.Network.Devices)
 			}, timeout, interval).Should(BeTrue())
 			Expect(createdMachine.Finalizers).To(ContainElement(finalizer))
 			Expect(allocated).To(BeTrue(), "should allocate the ip in ipam")
@@ -208,14 +201,7 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 				if err != nil {
 					return false
 				}
-				if len(createdMachine.Spec.Network.Devices) < 1 {
-					return false
-				}
-				dev := createdMachine.Spec.Network.Devices[0]
-				if len(dev.IPAddrs) < 1 || !net.ParseIP(dev.IPAddrs[0]).Equal(net.IPv4zero) {
-					return false
-				}
-				return true
+				return checkNetworkDevices(createdMachine.Spec.Network.Devices)
 			}, timeout, interval).Should(BeTrue())
 			Expect(allocated).To(BeTrue(), "should allocate the ip in ipam")
 
@@ -229,4 +215,22 @@ func waitForObject(ctx context.Context, key types.NamespacedName, obj client.Obj
 		err := k8sClient.Get(ctx, key, obj)
 		return err == nil
 	}, timeout, interval).Should(BeTrue())
+}
+
+func checkNetworkDevices(devices []v1alpha3.NetworkDeviceSpec) bool {
+	if len(devices) < 1 {
+		return false
+	}
+	dev := devices[0]
+	if len(dev.IPAddrs) < 1 {
+		return false
+	}
+	ip, netw, err := net.ParseCIDR(dev.IPAddrs[0])
+	if err != nil || !ip.Equal(net.IPv4(10, 0, 0, 0)) {
+		return false
+	}
+	if l, _ := netw.Mask.Size(); l != 24 {
+		return false
+	}
+	return true
 }

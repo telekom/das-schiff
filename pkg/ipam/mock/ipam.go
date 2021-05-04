@@ -9,9 +9,6 @@ import (
 type Manager struct {
 	Callback func(t, identifier, networkView string, subnet *net.IPNet)
 }
-type Subnet struct {
-	cid string
-}
 
 var _ ipam.Manager = &Manager{}
 
@@ -23,7 +20,7 @@ func (m *Manager) GetOrAllocateIP(identifier, networkView string, subnet *net.IP
 	if m.Callback != nil {
 		m.Callback("GetOrAllocate", identifier, networkView, subnet)
 	}
-	return net.IPv4zero, nil
+	return net.IPv4(10, 0, 0, 0), nil
 }
 
 func (m *Manager) ReleaseIP(identifier, networkView string, subnet *net.IPNet) error {
@@ -31,12 +28,4 @@ func (m *Manager) ReleaseIP(identifier, networkView string, subnet *net.IPNet) e
 		m.Callback("ReleaseIP", identifier, networkView, subnet)
 	}
 	return nil
-}
-
-func (s Subnet) Identifier() string {
-	return s.cid
-}
-
-func (s Subnet) Network() *net.IPNet {
-	return &net.IPNet{}
 }
