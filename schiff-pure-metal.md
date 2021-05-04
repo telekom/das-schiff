@@ -58,4 +58,8 @@ Pure Metal When it comes to very constrained environments like far edge with 3-5
 
 As minimal reasonable number of worker nodes in one cluster is 3 the minimal ressources of the cluster are **192 vCPUs** and **768GB RAM**. Therefore it is not efficient to use it deployments of smaller applications.
 
-Due to these limitations we are workng on [Das Schiff Liquid Metal](schiff-liquid-metal) which targets to use the lightweight virtualization technology such as [Firecracker microVM](https://github.com/firecracker-microvm/firecracker) to eliminate these limitations and opens doors for endless possibilities when it comes to managing kubernetes clusters on pools of bare-metal servers.
+Due to these limitations we are workng on [Das Schiff Liquid Metal](schiff-liquid-metal.md) which targets to use the lightweight virtualization technology such as [Firecracker microVM](https://github.com/firecracker-microvm/firecracker) to eliminate these limitations and opens doors for endless possibilities when it comes to managing kubernetes clusters on pools of bare-metal servers.
+
+## How to engage
+
+If Pure Metal rises your interest we would be happy to engage in the [discussion](../../discussions) about how could we bring it forward.

@@ -15,7 +15,7 @@
 
 - [Licensing](#licensing)
 - [Das Schiff Pure Metal](schiff-pure-metal.md) - our approach to dynamic bare metal cluster provisioning
-- [Das Schiff Liquid Metal](schiff-liquid-metal) - development to optimize Pure Metal for edge and far edge deployments with use of microVM technology.
+- [Das Schiff Liquid Metal](schiff-liquid-metal) - development to optimize Pure Metal for edge and far edge deployments with use of [microVM technology](https://www.weave.works/blog/multi-cluster-kubernetes-on-microvms-for-bare-metal).
 
 ## What is Das Schiff?
 
