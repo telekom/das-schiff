@@ -36,7 +36,7 @@ Das Schiff - the engine for establishment and supervision of autonomous cloud na
 #### Das Schiff Features
 
 * **Multi-cluster** (main basis and our approach to multi-tenantcy)
-* **Multi-distribution** (currently upstream K8S and EKS-D, but can support any K8s distro installable via kubeadm) 
+* **Multi-distribution** (currently upstream **[kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)** based and **[EKS-D](https://github.com/aws/eks-distro)**, but can support any K8s distro installable via kubeadm) 
 * **Multi-site** (core, edge, far edge)
 * **Infrastructure independent** (supports bare-metal as well as local IaaS, but can support public cloud as well)
 * **(Self)managed in a GitOps loop**
