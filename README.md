@@ -306,7 +306,7 @@ cluster-components
 |   \---location-2
 |       ... # Same as above
 +---network-zones
-|   +---environment-defaults # Network related defaults per environment
+|   +---environment-defaults # Contains the plain mainifest of each environment
 |   |   +---dev
 |   |   |   +---clusterrolebindings
 |   |   |   +---clusterroles
@@ -321,7 +321,7 @@ cluster-components
 |   |   \---tst
 |   |       ...
 |   +---network-segment-1 # Specific config for network segment 1
-|   |   ... # Same as above
+|   |   ... # Contains the kustomize overlays used to modify the base manifests for each environment
 |   \---network-segment-2
 |       ... # Same as above
 \---providers # CAPI provider defaults and specific configs per environment
