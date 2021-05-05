@@ -53,12 +53,13 @@ func (m *Manager) GetOrAllocateIP(deviceName, networkView string, subnet *net.IP
 	} else {
 		log.Info("No IP allocated to cluster, allocating IP")
 		// AllocateIP assigns first available IP to  the cluster.
-		allocatedIP, err := objMgr.AllocateIP(networkView, subnet.String(), "", "", deviceName, ea)
+
+		hostRecord, err := objMgr.CreateHostRecord(true, deviceName, networkView, "default."+networkView, subnet.String(), "", "", ea)
 		if err != nil {
 			log.Error(err, "Could not allocate IP for cluster")
 		}
 		log.Info("IP address allocated successfully to cluster")
-		return net.ParseIP(allocatedIP.IPAddress), err
+		return net.ParseIP(hostRecord.Ipv4Addr), err
 	}
 }
 
