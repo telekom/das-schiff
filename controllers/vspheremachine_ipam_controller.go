@@ -92,6 +92,11 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
+	machineName := getOwnerMachineName(vSphereMachine.ObjectMeta)
+	if machineName == "" {
+		return ctrl.Result{}, err
+	}
+
 	// Deallocate the IP if the Machine is marked for deletion
 	hasFinalizer := controllerutil.ContainsFinalizer(&vSphereMachine, finalizer)
 	if vSphereMachine.DeletionTimestamp != nil {
@@ -99,7 +104,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 			log.Info("machine deleted, releasing ip")
 			errs := []error{}
 			for _, i := range interfaces {
-				err := r.IPAM.ReleaseIP(vSphereMachine.Name, i.infobloxNetworkView, i.subnet)
+				err := r.IPAM.ReleaseIP(machineName, i.infobloxNetworkView, i.subnet)
 				if err != nil {
 					log.Error(err, "failed to release ip address")
 					errs = append(errs, err)
@@ -125,7 +130,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	changed := false
 	for _, i := range interfaces {
-		c, err := r.reconcileInterface(log, &vSphereMachine, i)
+		c, err := r.reconcileInterface(log, &vSphereMachine, machineName, i)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -148,7 +153,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	return ctrl.Result{}, nil
 }
 
-func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphereMachine *v1alpha3.VSphereMachine, i interfaceConfig) (
+func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphereMachine *v1alpha3.VSphereMachine, machineName string, i interfaceConfig) (
 	changed bool, err error) {
 
 	dev, devIdx := getDeviceByNetworkName(vSphereMachine.Spec.Network.Devices, i.networkName)
@@ -164,7 +169,7 @@ func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphe
 		return false, err
 	}
 
-	desiredIP, err := r.IPAM.GetOrAllocateIP(vSphereMachine.Name, i.infobloxNetworkView, i.subnet)
+	desiredIP, err := r.IPAM.GetOrAllocateIP(machineName, i.infobloxNetworkView, i.subnet)
 	if err != nil {
 		log.Error(err, "failed to retrieve desired IP")
 		return false, err
@@ -269,6 +274,15 @@ func (r *VSphereMachineIPAMReconciler) getInterfacesFromAnnotations(ctx context.
 	}
 
 	return interfaces, nil
+}
+
+func getOwnerMachineName(metadata v1.ObjectMeta) string {
+	for _, ownerRef := range metadata.OwnerReferences {
+		if ownerRef.Kind == "Machine" {
+			return ownerRef.Name
+		}
+	}
+	return ""
 }
 
 // SetupWithManager sets up the controller with the Manager.
