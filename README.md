@@ -124,15 +124,15 @@ cluster-definitions
 |       |   +---customer_A # Each site holds clusters of multiple customers. Customer clusters are grouped per site here.
 |       |   |   \---customer_A-workload-cluster-1 # Here are the definitions of one workload cluster
 |       |   |       |   bootstrap-kustomisation.yaml # Defines initial components in workload cluster: FluxCD and CNI
+|       |   |       |   external-ccm.yaml # Contains the CCM configured in a way to run on the management cluster
 |       |   |       |   Cluster.yml # All below are standard definitions of CAPI and Infrastructure Provider objects
-|       |   |       |   external-ccm.yaml # ^^^
 |       |   |       |   Kubeadm-config.yml # ^^^
 |       |   |       |   machinedeployment-0.yml # ^^^
 |       |   |       |   machinehealthcheck.yml # ^^^
 |       |   |       |   MachineTemplates.yml # ^^^
 |       |   |       |
 |       |   |       \---secrets
-|       |   |               external-ccm-secret.yaml
+|       |   |               external-ccm-secret.yaml # contains the crendentials for the CCM
 |       |   |
 |       |   \---customer_B
 |       |       \---customer_B-workload-cluster-1
@@ -145,11 +145,14 @@ cluster-definitions
 |                   |   # Same structure as above
 |
 |
-\---schiff-management-cluster-y # Here the domain of second management cluster starts
-    +---self-definitions
-    |
-    \---sites
-        \-- ... # Same structure as above
++---schiff-management-cluster-y # Here the domain of second management cluster starts
+|    +---self-definitions
+|    |
+|    \---sites
+|        \-- ... # Same structure as above
+|
+\---.sops.yaml # contains the rules to automatically encrypt all secrets in the secrets-folders with the correct keys
+
 ```
 
 Beside applying standard CAPI manifests incl. manifests of infrastructure providers, FluxCD in management cluster creates set of so called bootstrap Kustomizations. They represent the link between `cluster-definitions` and `cluster-components` repositories. Bootstrap Kustomizations are responsible for deploying of FluxCD and CNI as defined in `cluster-definitions` repo into a newly created workload cluster in order to hand the control to it. 
