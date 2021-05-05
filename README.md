@@ -96,10 +96,10 @@ The main loop that illustrates how Das Schiff combines different building blocks
 Description of the loop on example of workload cluster creation:
 1. Admin pushes definitions of the clusters and components to the repos
 2. FluxCD in management cluster detects the change in desired state and the cluster. In this example it creates corresponding CAPI objects and bootstrap Kustomizations.
-3. CAPI objects do their job and in communication with target infrastructure create a tenant cluster. As soon as that cluster is available Bootstrap Kustomizations deploy and configure CNI and FluxCD in it and set it to watch its own config repo.
+3. CAPI objects do their job and in communication with target infrastructure create a tenant cluster. As soon as that cluster is available Bootstrap Kustomizations deploy and configure CNI and FluxCD in it and set it to watch its own config repo. This also distributes initial cryptographic material needed for the cluster to decrpyt its secrets from git.
 4. FluxCD in new tenant cluster starts reconciling the tenant cluster with desired state described in Git. After short time the cluster reaches desired state which is than maintained by the loop.
 
-Same loop is used for any change in the running clusters.
+Same loop is used for any change in the running clusters, altough most changes only get aplied by the in-cluster Flux.
 
 ### Das Schiff layered repo
 
@@ -124,15 +124,15 @@ cluster-definitions
 |       |   +---customer_A # Each site holds clusters of multiple customers. Customer clusters are grouped per site here.
 |       |   |   \---customer_A-workload-cluster-1 # Here are the definitions of one workload cluster
 |       |   |       |   bootstrap-kustomisation.yaml # Defines initial components in workload cluster: FluxCD and CNI
+|       |   |       |   external-ccm.yaml # Contains the CCM configured in a way to run on the management cluster
 |       |   |       |   Cluster.yml # All below are standard definitions of CAPI and Infrastructure Provider objects
-|       |   |       |   external-ccm.yaml # ^^^
 |       |   |       |   Kubeadm-config.yml # ^^^
 |       |   |       |   machinedeployment-0.yml # ^^^
 |       |   |       |   machinehealthcheck.yml # ^^^
 |       |   |       |   MachineTemplates.yml # ^^^
 |       |   |       |
 |       |   |       \---secrets
-|       |   |               external-ccm-secret.yaml
+|       |   |               external-ccm-secret.yaml # contains the crendentials for the CCM
 |       |   |
 |       |   \---customer_B
 |       |       \---customer_B-workload-cluster-1
@@ -145,11 +145,14 @@ cluster-definitions
 |                   |   # Same structure as above
 |
 |
-\---schiff-management-cluster-y # Here the domain of second management cluster starts
-    +---self-definitions
-    |
-    \---sites
-        \-- ... # Same structure as above
++---schiff-management-cluster-y # Here the domain of second management cluster starts
+|    +---self-definitions
+|    |
+|    \---sites
+|        \-- ... # Same structure as above
+|
+\---.sops.yaml # contains the rules to automatically encrypt all secrets in the secrets-folders with the correct keys
+
 ```
 
 Beside applying standard CAPI manifests incl. manifests of infrastructure providers, FluxCD in management cluster creates set of so called bootstrap Kustomizations. They represent the link between `cluster-definitions` and `cluster-components` repositories. Bootstrap Kustomizations are responsible for deploying of FluxCD and CNI as defined in `cluster-definitions` repo into a newly created workload cluster in order to hand the control to it. 
@@ -303,7 +306,7 @@ cluster-components
 |   \---location-2
 |       ... # Same as above
 +---network-zones
-|   +---environment-defaults # Network related defaults per environment
+|   +---environment-defaults # Contains the plain mainifest of each environment
 |   |   +---dev
 |   |   |   +---clusterrolebindings
 |   |   |   +---clusterroles
@@ -318,7 +321,7 @@ cluster-components
 |   |   \---tst
 |   |       ...
 |   +---network-segment-1 # Specific config for network segment 1
-|   |   ... # Same as above
+|   |   ... # Contains the kustomize overlays used to modify the base manifests for each environment
 |   \---network-segment-2
 |       ... # Same as above
 \---providers # CAPI provider defaults and specific configs per environment
