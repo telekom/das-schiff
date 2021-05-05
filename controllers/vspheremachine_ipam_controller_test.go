@@ -63,7 +63,7 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 		}, timeout, interval).Should(BeTrue())
 	})
 
-	Context("when it finds a machine without an ip address", func() {
+	Context("when it finds a machine with ipam annotations", func() {
 		It("handles its full lifecycle", func() {
 			ctx := context.Background()
 			allocated := false
@@ -208,6 +208,96 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 			Expect(k8sClient.Delete(ctx, machine)).To(Succeed())
 		})
 	})
+	Context("When it finds a VSphereMachine with multiple ipam annotations", func() {
+		It("handles all specified interfaces", func() {
+			ctx := context.Background()
+			allocated := []string{}
+			released := []string{}
+			ipamManager.Callback = func(t, id, networkView string, subnet *net.IPNet) {
+				ctrl.Log.Info("ipam callback", "deviceName", id, "networkView", networkView, "subnet", subnet.String())
+				if id != MachineName || networkView != NetworkView {
+					return
+				}
+				if t == "GetOrAllocate" {
+					allocated = append(allocated, subnet.String())
+				}
+				if t == "ReleaseIP" {
+					released = append(released, subnet.String())
+				}
+			}
+			machine := &v1alpha3.VSphereMachine{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      MachineName,
+					Namespace: Namespace,
+					Labels: map[string]string{
+						clusterNameLabel: ClusterName,
+					},
+					Annotations: map[string]string{
+						"ipam.schiff.telekom.de/0-NetworkName":         NetworkName,
+						"ipam.schiff.telekom.de/0-InfobloxNetworkView": NetworkView,
+						"ipam.schiff.telekom.de/0-Subnet":              TestSubnet.String(),
+						"ipam.schiff.telekom.de/1-NetworkName":         NetworkName + "2",
+						"ipam.schiff.telekom.de/1-InfobloxNetworkView": NetworkView,
+						"ipam.schiff.telekom.de/1-Subnet":              "10.1.0.0/24",
+						clusterNameLabel:                               ClusterName,
+					},
+				},
+				Spec: v1alpha3.VSphereMachineSpec{
+					VirtualMachineCloneSpec: v1alpha3.VirtualMachineCloneSpec{
+						Network: v1alpha3.NetworkSpec{Devices: []v1alpha3.NetworkDeviceSpec{
+							{NetworkName: NetworkName},
+							{NetworkName: NetworkName + "2"},
+						}},
+						Template: Template,
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, machine)).To(Succeed())
+
+			By("allocating IPs for all interfaces")
+			createdMachine := &v1alpha3.VSphereMachine{}
+			// wait for creation
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, NamespacedName, createdMachine)
+				if err != nil {
+					return false
+				}
+				if len(createdMachine.Spec.Network.Devices) < 2 {
+					return false
+				}
+				for i, expectedIP := range []net.IP{net.IPv4(10, 0, 0, 1), net.IPv4(10, 1, 0, 1)} {
+					dev := createdMachine.Spec.Network.Devices[i]
+					if len(dev.IPAddrs) < 1 {
+						return false
+					}
+					ip, netw, err := net.ParseCIDR(dev.IPAddrs[0])
+					if err != nil || !ip.Equal(expectedIP) {
+						return false
+					}
+					if l, _ := netw.Mask.Size(); l != 24 {
+						return false
+					}
+				}
+
+				return true
+			}, timeout, interval).Should(BeTrue())
+			Expect(createdMachine.Finalizers).To(ContainElement(finalizer))
+			Expect(allocated).To(ContainElements([]string{TestSubnet.String(), "10.1.0.0/24"}), "should allocate the ip in ipam")
+
+			By("releasing the IPs on deletion")
+			Expect(k8sClient.Delete(context.Background(), &v1alpha3.VSphereMachine{ObjectMeta: meta})).To(Succeed())
+			// wait for deletion
+			Eventually(func() bool {
+				err := k8sClient.Get(context.Background(), NamespacedName, &v1alpha3.VSphereMachine{})
+				if err != nil || false {
+					return true
+				}
+				return false
+			}, timeout, interval).Should(BeTrue())
+			Expect(released).To(ContainElements([]string{TestSubnet.String(), "10.1.0.0/24"}), "should release the ip in ipam")
+
+		})
+	})
 })
 
 func waitForObject(ctx context.Context, key types.NamespacedName, obj client.Object) {
@@ -226,7 +316,7 @@ func checkNetworkDevices(devices []v1alpha3.NetworkDeviceSpec) bool {
 		return false
 	}
 	ip, netw, err := net.ParseCIDR(dev.IPAddrs[0])
-	if err != nil || !ip.Equal(net.IPv4(10, 0, 0, 0)) {
+	if err != nil || !ip.Equal(net.IPv4(10, 0, 0, 1)) {
 		return false
 	}
 	if l, _ := netw.Mask.Size(); l != 24 {

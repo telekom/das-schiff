@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"regexp"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"gitlab.devops.telekom.de/schiff/engine/schiff-operator.git/pkg/ipam"
@@ -36,13 +38,26 @@ const finalizer = "ipam.schiff.telekom.de/DeallocateMachineIP"
 const networkNameAnnotation = "ipam.schiff.telekom.de/NetworkName"
 const subnetAnnotation = "ipam.schiff.telekom.de/Subnet"
 const infobloxNetworkViewAnnotation = "ipam.schiff.telekom.de/InfobloxNetworkView"
+const annotationPrefix = "ipam.schiff.telekom.de/"
+const networkNameParam = "NetworkName"
+const subnetParam = "Subnet"
+const infobloxNetworkViewParam = "InfobloxNetworkView"
+
+var annotationRegex = regexp.MustCompile(`ipam\.schiff\.telekom\.de\/(\d+-)Subnet`)
 
 // var errMissingParam = errors.New("object is missing required parameters")
 type errMissingParam error
 
+type interfaceConfig struct {
+	subnet              *net.IPNet
+	networkName         string
+	infobloxNetworkView string
+}
+
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines/status,verbs=get
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines/finalizers,verbs=update
+// +kubebuilder:rbac:groups=cluster.x-k8s.io,resources=machines,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -68,7 +83,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	subnet, networkName, ibNetworkView, err := r.getParams(ctx, vSphereMachine.ObjectMeta)
+	interfaces, err := r.getInterfacesFromAnnotations(ctx, vSphereMachine.ObjectMeta)
 	if err != nil {
 		if err, ok := err.(errMissingParam); ok {
 			log.V(2).Info(err.Error())
@@ -82,10 +97,16 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	if vSphereMachine.DeletionTimestamp != nil {
 		if hasFinalizer {
 			log.Info("machine deleted, releasing ip")
-			err := r.IPAM.ReleaseIP(vSphereMachine.Name, ibNetworkView, subnet)
-			if err != nil {
-				log.Error(err, "failed to release ip address")
-				return ctrl.Result{}, err
+			errs := []error{}
+			for _, i := range interfaces {
+				err := r.IPAM.ReleaseIP(vSphereMachine.Name, i.infobloxNetworkView, i.subnet)
+				if err != nil {
+					log.Error(err, "failed to release ip address")
+					errs = append(errs, err)
+				}
+			}
+			if len(errs) > 0 {
+				return ctrl.Result{}, errs[0]
 			}
 
 			controllerutil.RemoveFinalizer(&vSphereMachine, finalizer)
@@ -102,42 +123,13 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, nil
 	}
 
-	dev, devIdx := getDeviceByNetworkName(vSphereMachine.Spec.Network.Devices, networkName)
-	if devIdx < 0 {
-		err := errors.New("device with annotated network name not found")
-		log.WithValues("network name", networkName).Error(err, "could not set manual IP")
-		return ctrl.Result{}, err
-	}
-
-	if dev.DHCP4 || dev.DHCP6 {
-		err := errors.New("dhcp enabled on device")
-		log.Error(err, "could set manual IP")
-		return ctrl.Result{}, err
-	}
-
-	desiredIP, err := r.IPAM.GetOrAllocateIP(vSphereMachine.Name, ibNetworkView, subnet)
-	if err != nil {
-		log.Error(err, "failed to retrieve desired IP")
-		return ctrl.Result{}, err
-	}
-	log.V(4).WithValues("ipAddress", desiredIP).Info("fetched ip address from ipam")
-
-	exists := false
-	for _, ip := range dev.IPAddrs {
-		if mIP, mSubnet, err := net.ParseCIDR(ip); err == nil && mIP.Equal(desiredIP) && mSubnet.Mask.String() == subnet.Mask.String() {
-			exists = true
-			break
-		}
-	}
-
 	changed := false
-
-	if !exists {
-		prefix, _ := subnet.Mask.Size()
-		cidr := fmt.Sprintf("%v/%v", desiredIP.String(), prefix)
-		log.WithValues("ipAddress", cidr).Info("adding allocated ip address to machine")
-		vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs = append(dev.IPAddrs, cidr)
-		changed = true
+	for _, i := range interfaces {
+		c, err := r.reconcileInterface(log, &vSphereMachine, i)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		changed = changed || c
 	}
 
 	if !hasFinalizer {
@@ -156,6 +148,47 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	return ctrl.Result{}, nil
 }
 
+func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphereMachine *v1alpha3.VSphereMachine, i interfaceConfig) (
+	changed bool, err error) {
+
+	dev, devIdx := getDeviceByNetworkName(vSphereMachine.Spec.Network.Devices, i.networkName)
+	if devIdx < 0 {
+		err := errors.New("device with annotated network name not found")
+		log.WithValues("network name", i.networkName).Error(err, "could not set manual IP")
+		return false, err
+	}
+
+	if dev.DHCP4 || dev.DHCP6 {
+		err := errors.New("dhcp enabled on device")
+		log.Error(err, "could set manual IP")
+		return false, err
+	}
+
+	desiredIP, err := r.IPAM.GetOrAllocateIP(vSphereMachine.Name, i.infobloxNetworkView, i.subnet)
+	if err != nil {
+		log.Error(err, "failed to retrieve desired IP")
+		return false, err
+	}
+	log.V(4).WithValues("ipAddress", desiredIP).Info("fetched ip address from ipam")
+
+	exists := false
+	for _, ip := range dev.IPAddrs {
+		if mIP, mSubnet, err := net.ParseCIDR(ip); err == nil && mIP.Equal(desiredIP) && mSubnet.Mask.String() == i.subnet.Mask.String() {
+			exists = true
+			break
+		}
+	}
+
+	if !exists {
+		prefix, _ := i.subnet.Mask.Size()
+		cidr := fmt.Sprintf("%v/%v", desiredIP.String(), prefix)
+		log.WithValues("ipAddress", cidr).Info("adding allocated ip address to machine")
+		vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs = append(dev.IPAddrs, cidr)
+		changed = true
+	}
+	return
+}
+
 func getDeviceByNetworkName(devices []v1alpha3.NetworkDeviceSpec, name string) (dev v1alpha3.NetworkDeviceSpec, index int) {
 	for i, d := range devices {
 		if d.NetworkName == name {
@@ -165,47 +198,77 @@ func getDeviceByNetworkName(devices []v1alpha3.NetworkDeviceSpec, name string) (
 	return v1alpha3.NetworkDeviceSpec{}, -1
 }
 
-func getParamsFromAnnotations(annotations map[string]string) (subnet *net.IPNet, networkName, ibNetworkView string, err error) {
-	subnetAnno, ok := annotations[subnetAnnotation]
+func getInterfaceFromAnnotations(annotations map[string]string, prefix string) (interfaceConfig, error) {
+	i := interfaceConfig{}
+	var err error
+	subnetAnno, ok := annotations[annotationPrefix+prefix+subnetParam]
 	if !ok {
 		err = errMissingParam(errors.New("missing subnet annotation"))
-		return
+		return interfaceConfig{}, err
 	}
-	_, subnet, err = net.ParseCIDR(subnetAnno)
+	_, i.subnet, err = net.ParseCIDR(subnetAnno)
 	if err != nil {
 		err = fmt.Errorf("failed to parse subnet CIDR: %v", err)
-		return
+		return interfaceConfig{}, err
 	}
 
-	ibNetworkView, ok = annotations[infobloxNetworkViewAnnotation]
+	i.infobloxNetworkView, ok = annotations[annotationPrefix+prefix+infobloxNetworkViewParam]
 	if !ok {
 		err = errMissingParam(errors.New("missing network zone annotation"))
-		return
+		return interfaceConfig{}, err
 	}
 
-	networkName, ok = annotations[networkNameAnnotation]
+	i.networkName, ok = annotations[annotationPrefix+prefix+networkNameParam]
 	if !ok {
 		err = errMissingParam(errors.New("missing network name annotation"))
-		return
+		return interfaceConfig{}, err
 	}
-	return
+	return i, nil
 }
 
-func (r *VSphereMachineIPAMReconciler) getParams(ctx context.Context, metadata v1.ObjectMeta) (subnet *net.IPNet, networkName, ibNetworkView string, err error) {
-	subnet, networkName, ibNetworkView, err = getParamsFromAnnotations(metadata.Annotations)
-	if _, ok := err.(errMissingParam); ok {
+func (r *VSphereMachineIPAMReconciler) getInterfacesFromAnnotations(ctx context.Context, metadata v1.ObjectMeta) ([]interfaceConfig, error) {
+	annotations := metadata.GetAnnotations()
+	containsPrefix := false
+	for k := range annotations {
+		if strings.HasPrefix(k, annotationPrefix) {
+			containsPrefix = true
+			break
+		}
+	}
+	if !containsPrefix {
 		for _, ownerRef := range metadata.OwnerReferences {
 			if ownerRef.Kind == "Machine" {
 				machine := &capiv1alpha3.Machine{}
-				err = r.Get(ctx, types.NamespacedName{Namespace: metadata.GetNamespace(), Name: ownerRef.Name}, machine)
+				err := r.Get(ctx, types.NamespacedName{Namespace: metadata.GetNamespace(), Name: ownerRef.Name}, machine)
 				if err != nil {
-					return
+					return nil, err
 				}
-				return getParamsFromAnnotations(machine.Annotations)
+				annotations = machine.GetAnnotations()
 			}
 		}
 	}
-	return
+
+	interfaces := []interfaceConfig{}
+	for k := range annotations {
+		res := annotationRegex.FindStringSubmatch(k)
+		if len(res) > 1 {
+			i, err := getInterfaceFromAnnotations(annotations, res[1])
+			if err != nil {
+				return nil, err
+			}
+			interfaces = append(interfaces, i)
+		}
+	}
+
+	if len(interfaces) == 0 {
+		i, err := getInterfaceFromAnnotations(annotations, "")
+		if err != nil {
+			return nil, err
+		}
+		interfaces = append(interfaces, i)
+	}
+
+	return interfaces, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

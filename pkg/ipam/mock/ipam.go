@@ -20,7 +20,9 @@ func (m *Manager) GetOrAllocateIP(identifier, networkView string, subnet *net.IP
 	if m.Callback != nil {
 		m.Callback("GetOrAllocate", identifier, networkView, subnet)
 	}
-	return net.IPv4(10, 0, 0, 0), nil
+	ip := subnet.IP
+	ip[3] += 1
+	return ip, nil
 }
 
 func (m *Manager) ReleaseIP(identifier, networkView string, subnet *net.IPNet) error {
