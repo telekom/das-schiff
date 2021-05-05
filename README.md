@@ -96,10 +96,10 @@ The main loop that illustrates how Das Schiff combines different building blocks
 Description of the loop on example of workload cluster creation:
 1. Admin pushes definitions of the clusters and components to the repos
 2. FluxCD in management cluster detects the change in desired state and the cluster. In this example it creates corresponding CAPI objects and bootstrap Kustomizations.
-3. CAPI objects do their job and in communication with target infrastructure create a tenant cluster. As soon as that cluster is available Bootstrap Kustomizations deploy and configure CNI and FluxCD in it and set it to watch its own config repo.
+3. CAPI objects do their job and in communication with target infrastructure create a tenant cluster. As soon as that cluster is available Bootstrap Kustomizations deploy and configure CNI and FluxCD in it and set it to watch its own config repo. This also distributes initial cryptographic material needed for the cluster to decrpyt its secrets from git.
 4. FluxCD in new tenant cluster starts reconciling the tenant cluster with desired state described in Git. After short time the cluster reaches desired state which is than maintained by the loop.
 
-Same loop is used for any change in the running clusters.
+Same loop is used for any change in the running clusters, altough most changes only get aplied by the in-cluster Flux.
 
 ### Das Schiff layered repo
 
