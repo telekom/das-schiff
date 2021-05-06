@@ -25,9 +25,9 @@ Das Schiff is a fully open-source based engine, created and used in production i
 
 [Telekom Deutschland](https://de.wikipedia.org/wiki/Telekom_Deutschland) is leading integrated communications provider in Germany, part of [Deutsche Telekom Group](https://www.telekom.com/en). Deutsche Telekom Technik is a network technology (NT)department of Telekom Deutschland in charge of providing infrastructure to deliver communication services via its 17.5m fixed line connections and to 48.8m mobile customers.
 
-Similar as in any telco, NT departments do not run typical IT workloads. Instead of it we run networks, network functions, service platforms and associated managment systems. Modern examples of those are 5G core, ORAN DU, remote UPF, BNG, IMS, IPTV etc. Large portion of those is geographically distributed due to the nature of communications technology (e.g. access node or mobile tower). If we have full picture in mind incl. far edge locations we are talking about couple of thousands locationsin Germany.
+Similar as in any telco, NT departments do not run typical IT workloads. Instead of it we run networks, network functions, service platforms and associated managment systems. Modern examples of those are 5G core, ORAN DU, remote UPF, BNG, IMS, IPTV etc. Large portion of those is geographically distributed due to the nature of communications technology (e.g. access node or mobile tower). If we have full picture in mind incl. far edge locations we are talking about couple of thousands locations in Germany.
 
-As all of those workloads are rapidly transforming towards cloud native architecture, thus requiring a Kubernetes cluster(s) to run in them. With that our challenge became following: *"How to manage thousands of Kubernetes clusters accross hundreds of locations, on top of bare-metal servers or VMs, with small, highly skilled SRE team and using open-source software only?"*
+As all of those workloads are rapidly transforming towards cloud native architecture, thus requiring a Kubernetes cluster(s) to run them in. With that our challenge became following: *"How to manage thousands of Kubernetes clusters accross hundreds of locations, on top of bare-metal servers or VMs, with a small, highly skilled SRE team and using only open-source software?"*
 
 ### Our Answer
 
@@ -35,7 +35,7 @@ Das Schiff - the engine for establishment and supervision of autonomous cloud na
 
 #### Das Schiff Features
 
-* **Multi-cluster** (main basis and our approach to multi-tenantcy)
+* **Multi-cluster** (main basis and our approach to multi-tenancy)
 * **Multi-distribution** (currently upstream **[kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)** based and **[EKS-D](https://github.com/aws/eks-distro)**, but can support any K8s distro installable via kubeadm) 
 * **Multi-site** (core, edge, far edge)
 * **Infrastructure independent** (supports bare-metal as well as local IaaS, but can support public cloud as well)
@@ -47,15 +47,15 @@ Das Schiff - the engine for establishment and supervision of autonomous cloud na
 
 #### What is needed to run Das Schiff?
 
-To run Das Schiff you need reliable **Git platform** (we use GitLab), **Container and Helm charts Registry** (we use Harbor) and at least one of two:
+To run Das Schiff you need a reliable **Git platform** (we use GitLab), **Container and Helm charts Registry** (we use Harbor) and at least one of two:
 - **For bare-metal K8s clusters**: locations with pools of bare-metal servers with Redfish based IPMI and with their BMC ports connected to a network that you can reach.
-- **For VM based K8s clusters**: IaaS consuimable via an API (e.g. vSphere, AWS, Azure, OpenStack etc.) that you can reach.
+- **For VM based K8s clusters**: IaaS consumable via an API (e.g. vSphere, AWS, Azure, OpenStack etc.) that you can reach.
 
 #### Can Das Schiff be used outside of Deutsche Telekom Technik?
 
-We believe that best platforms are open. The success of Kubernetes and several other examples from the past confirms that. We believe that now is the time and chance for telcos to build on Kubernetes as ["The platform for building platforms](https://twitter.com/kelseyhightower/status/935252923721793536?lang=en) and adopt modern devops practices of "continous everyhing" in production of its services. This requires the industry to adopt best practices in that area move away from traditional "systems integrated" approach. 
+We believe that best platforms are open. The success of Kubernetes and several other examples from the past confirms that. We believe that now is the time and chance for telcos to build on Kubernetes as ["The platform for building platforms](https://twitter.com/kelseyhightower/status/935252923721793536?lang=en) and adopt modern devops practices of "continous everything" in production of its services. This requires the industry to adopt best practices in that area and to move away from the traditional "systems integrated" approach. 
 
-Therefore, we are working together with our friends from [Weaveworks - original creators of GitOps movement](https://www.weave.works/) to make Das Schiff generalized and consumable by anybody who have need to manage large number of Kubernetes clusters distributed accross many locations. Primary goal is to create open, composable and flexible 5G/telco cloud native platform for production. However it could be useful for anyone who needs to manage fleets of distributed Kubernetes clusters such as retail, railway, industrial networks etc. The initiative is currently code-named **K5G** and we would be happy to join forces with all interested parties. While we are working on **K5G** feel free to engage in the [discussions](../../discussions).
+Therefore, we are working together with our friends from [Weaveworks - original creators of GitOps movement](https://www.weave.works/) to make Das Schiff generalized and consumable by anybody who needs to manage a large number of Kubernetes clusters distributed accross many locations. Our Primary goal is to create an open, composable and flexible 5G/telco cloud native platform for production. However it could be useful for anyone who needs to manage fleets of distributed Kubernetes clusters such as retail, railway, industrial networks etc. The initiative is currently code-named **K5G** and we would be happy to join forces with all interested parties. While we are working on **K5G**, feel free to engage in the [discussions](../../discussions).
 
 #### Is Das Schiff / K5G part of any industry initiative?
 
@@ -73,19 +73,19 @@ One CAPI management cluster manages workload clusters in multiple local or remot
 
 <p align="center"><img src="images/capi-multi-site.png" align="center"></p>
 
-Depending on the deployment scenario there can multiple management clusters that manage workloads in multiple regions or environments.
+Depending on the deployment scenario there can be multiple management clusters, that manage workloads in multiple regions or environments.
 
-Definition of entire infrastructure including workload clusters is stored in two main Git repos. 
+Definition of the entire infrastructure including workload clusters is stored in two main Git repos. 
 
 <p align="left"><img src="images/infrastructure-repo.png" align="center"></p>
 
-* `cluster-definitions` repo contains CAPI manifests that define the workload clusters and is used by management cluster for autonomous bootstrapping of workload clusters (CaaS).
+* `cluster-definitions` repo contains CAPI manifests that define the workload clusters and is used by the management cluster for autonomous bootstrapping of workload clusters (CaaS).
 
 * `cluster-components` repo contains descriptions and configurations of applications that need to run in workload clusters as standard components (PaaS - Prometheus, Logstash, RBAC) and is used by workload clusters to set themselves up autonomously.  
 
 Git is used as main management tool.
 
-Each management cluster has FluxCD v2 deployed and configured to watch a `cluster-definitions` repo related to the that management cluster. As the part of bootstrapping of workload clusters, each cluster comes equipped with FluxCD v2 that points to `cluster-components` repo relevant for that cluster.  
+Each management cluster has FluxCD v2 deployed and configured to watch a `cluster-definitions` repo related to the management cluster. As the part of bootstrapping of workload clusters, each cluster comes equipped with FluxCD v2 that points to `cluster-components` repo relevant for that cluster.  
 
 ### Das Schiff loop
 
@@ -96,10 +96,10 @@ The main loop that illustrates how Das Schiff combines different building blocks
 Description of the loop on example of workload cluster creation:
 1. Admin pushes definitions of the clusters and components to the repos
 2. FluxCD in management cluster detects the change in desired state and the cluster. In this example it creates corresponding CAPI objects and bootstrap Kustomizations.
-3. CAPI objects do their job and in communication with target infrastructure create a tenant cluster. As soon as that cluster is available Bootstrap Kustomizations deploy and configure CNI and FluxCD in it and set it to watch its own config repo. This also distributes initial cryptographic material needed for the cluster to decrpyt its secrets from git.
-4. FluxCD in new tenant cluster starts reconciling the tenant cluster with desired state described in Git. After short time the cluster reaches desired state which is than maintained by the loop.
+3. CAPI objects do their job and in communication with target infrastructure create a tenant cluster. As soon as that cluster is available, bootstrap Kustomizations deploy and configure CNI and FluxCD in it and set it to watch its own config repo. This also distributes initial cryptographic material needed for the cluster to decrypt its secrets from git.
+4. FluxCD in new tenant cluster starts reconciling the tenant cluster with desired state described in Git. After a short time the cluster reaches desired state which is then maintained by the loop.
 
-Same loop is used for any change in the running clusters, altough most changes only get aplied by the in-cluster Flux.
+Same loop is used for any change in the running clusters, altough most changes only get applied by the in-cluster Flux.
 
 ### Das Schiff layered repo
 
@@ -132,7 +132,7 @@ cluster-definitions
 |       |   |       |   MachineTemplates.yml # ^^^
 |       |   |       |
 |       |   |       \---secrets
-|       |   |               external-ccm-secret.yaml # contains the crendentials for the CCM
+|       |   |               external-ccm-secret.yaml # contains the credentials for the CCM
 |       |   |
 |       |   \---customer_B
 |       |       \---customer_B-workload-cluster-1
@@ -155,11 +155,11 @@ cluster-definitions
 
 ```
 
-Beside applying standard CAPI manifests incl. manifests of infrastructure providers, FluxCD in management cluster creates set of so called bootstrap Kustomizations. They represent the link between `cluster-definitions` and `cluster-components` repositories. Bootstrap Kustomizations are responsible for deploying of FluxCD and CNI as defined in `cluster-definitions` repo into a newly created workload cluster in order to hand the control to it. 
+Beside applying standard CAPI manifests incl. manifests of infrastructure providers, FluxCD in management cluster creates set of so called bootstrap Kustomizations. They represent the link between `cluster-definitions` and `cluster-components` repositories. Bootstrap Kustomizations are responsible for deploying of FluxCD and CNI as defined in `cluster-definitions` repo into a newly created workload cluster, in order to hand the control to it. 
 
-At the beginning the bootstrap Kustomizations are failing as the workload cluster is not yet there. As soon as workload cluster is available they will reconcile it and the loop will continue. After that the sole role of these Kustomizations is to repair / re-apply FluxCD in workload cluster if it fails for any reason.
+At the beginning the bootstrap Kustomizations are failing as the workload cluster is not there yet. As soon as the workload cluster is available they will reconcile it and the loop will continue. After that the sole purpose of these Kustomizations is to repair / re-apply FluxCD in the workload cluster if it fails for any reason.
 
-The sample bootstrap-kustiomization.yaml is given below.
+The sample bootstrap-kustomization.yaml is given below.
 
 ```yaml
 ---
@@ -210,7 +210,7 @@ spec:
       name: customer_A-workload-cluster-1-kubeconfig
 ```
 
-The `cluster-components` repository has layered structure that is used to create overlayed Kustomizations relevant for particular cluster that get applied. 
+The `cluster-components` repository has a layered structure, that is used to create overlayed Kustomizations relevant for particular cluster that get applied. 
 
 The Git directories which are configured in these Kustomizations contain mostly the following:
 * Plain manifests for namespaces, CNI, RBAC etc. 
@@ -221,13 +221,13 @@ The Git directories which are configured in these Kustomizations contain mostly 
 
 The Kustomizations are applied in the order from most general contained in `default/components` which is valid for all clusters, up to most specific for the particular cluster which is in `locations`.
 
-In this way we can manage groups of clusters in quite granular way:
+In this way we can manage groups of clusters in a quite granular way:
 * Default - for all clusters under management
 * Customers - for all clusters of an internal customers in all or all in particular environment
 * Environments - for all clusters in an environment like Dev, Test, Reference or Production
 * Providers - for all clusters created via particular CAPI provider or all in particular environment
 * Network zones - for all clusters in an network serment (important since CSP networks are usually very segmented and diverse)
-* Locations - for all cluster in particular location & site or for individual clusters.
+* Locations - for all clusters in particular location & site or for individual clusters.
 
 Here is corresponding structure of `cluster-components` repo:
 
