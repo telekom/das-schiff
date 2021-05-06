@@ -34,7 +34,7 @@ func (m *Manager) getIBConnector() (*ibclient.Connector, error) {
 // GetorAllocateIP retrieves a reserved IP address from the subnet, if no IP has been reserved, it reserves
 // the next available IP address in the subnet.
 
-func (m *Manager) GetOrAllocateIP(deviceName, networkView string, subnet *net.IPNet) (net.IP, error) {
+func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IPNet) (net.IP, error) {
 	conn, err := m.getIBConnector()
 	if err != nil {
 		log.Error(err, "Cannot initiate connection")
@@ -54,9 +54,10 @@ func (m *Manager) GetOrAllocateIP(deviceName, networkView string, subnet *net.IP
 		log.Info("No IP allocated to cluster, allocating IP")
 		// AllocateIP assigns first available IP to  the cluster.
 
-		hostRecord, err := objMgr.CreateHostRecord(true, deviceName, networkView, "default."+networkView, subnet.String(), "", "", ea)
+		hostRecord, err := objMgr.CreateHostRecord(true, deviceFQDN, networkView, "default."+networkView, subnet.String(), "", "", ea)
 		if err != nil {
 			log.Error(err, "Could not allocate IP for cluster")
+			return nil, err
 		}
 		log.Info("IP address allocated successfully to cluster")
 		return net.ParseIP(hostRecord.Ipv4Addr), err

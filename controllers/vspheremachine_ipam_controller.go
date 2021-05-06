@@ -35,13 +35,11 @@ type VSphereMachineIPAMReconciler struct {
 
 const clusterNameLabel = "cluster.x-k8s.io/cluster-name"
 const finalizer = "ipam.schiff.telekom.de/DeallocateMachineIP"
-const networkNameAnnotation = "ipam.schiff.telekom.de/NetworkName"
-const subnetAnnotation = "ipam.schiff.telekom.de/Subnet"
-const infobloxNetworkViewAnnotation = "ipam.schiff.telekom.de/InfobloxNetworkView"
 const annotationPrefix = "ipam.schiff.telekom.de/"
 const networkNameParam = "NetworkName"
 const subnetParam = "Subnet"
 const infobloxNetworkViewParam = "InfobloxNetworkView"
+const dnsZoneParam = "DNSZone"
 
 var annotationRegex = regexp.MustCompile(`ipam\.schiff\.telekom\.de\/(\d+-)Subnet`)
 
@@ -52,6 +50,7 @@ type interfaceConfig struct {
 	subnet              *net.IPNet
 	networkName         string
 	infobloxNetworkView string
+	dnsZone             string
 }
 
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=vspheremachines,verbs=get;list;watch;update;patch
@@ -104,7 +103,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 			log.Info("machine deleted, releasing ip")
 			errs := []error{}
 			for _, i := range interfaces {
-				err := r.IPAM.ReleaseIP(machineName, i.infobloxNetworkView, i.subnet)
+				err := r.IPAM.ReleaseIP(machineName+"."+i.dnsZone, i.infobloxNetworkView, i.subnet)
 				if err != nil {
 					log.Error(err, "failed to release ip address")
 					errs = append(errs, err)
@@ -169,7 +168,7 @@ func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphe
 		return false, err
 	}
 
-	desiredIP, err := r.IPAM.GetOrAllocateIP(machineName, i.infobloxNetworkView, i.subnet)
+	desiredIP, err := r.IPAM.GetOrAllocateIP(machineName+"."+i.dnsZone, i.infobloxNetworkView, i.subnet)
 	if err != nil {
 		log.Error(err, "failed to retrieve desired IP")
 		return false, err
@@ -226,6 +225,12 @@ func getInterfaceFromAnnotations(annotations map[string]string, prefix string) (
 	i.networkName, ok = annotations[annotationPrefix+prefix+networkNameParam]
 	if !ok {
 		err = errMissingParam(errors.New("missing network name annotation"))
+		return interfaceConfig{}, err
+	}
+
+	i.dnsZone, ok = annotations[annotationPrefix+prefix+dnsZoneParam]
+	if !ok {
+		err = errMissingParam(errors.New("missing dns zone annotation"))
 		return interfaceConfig{}, err
 	}
 	return i, nil
