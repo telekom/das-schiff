@@ -34,7 +34,7 @@ type VSphereMachineIPAMReconciler struct {
 }
 
 const clusterNameLabel = "cluster.x-k8s.io/cluster-name"
-const finalizer = "ipam.schiff.telekom.de/DeallocateMachineIP"
+const finalizer = "ipam.schiff.telekom.de/ReleaseIPs"
 const annotationPrefix = "ipam.schiff.telekom.de/"
 const networkNameParam = "NetworkName"
 const subnetParam = "Subnet"
