@@ -42,26 +42,30 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 	defer conn.Logout()
 	objMgr := ibclient.NewObjectManager(conn, "myclient", "")
 	objMgr.OmitCloudAttrs = true // Needs to be set for on-prem version of Infoblox
-	ea := make(ibclient.EA)
-	fixedAddress, err := objMgr.GetFixedAddress(networkView, subnet.String(), "", "")
+
+	hostRecord, err := objMgr.GetHostRecord(deviceFQDN)
 	if err != nil {
 		log.Error(err, "Could not get assigned IP address for cluster")
 	}
-	if fixedAddress != nil {
-		log.Info("IP Address already assigned to cluster")
-		return net.ParseIP(fixedAddress.IPAddress), err
-	} else {
-		log.Info("No IP allocated to cluster, allocating IP")
-		// AllocateIP assigns first available IP to  the cluster.
-
-		hostRecord, err := objMgr.CreateHostRecord(true, deviceFQDN, networkView, "default."+networkView, subnet.String(), "", "", ea)
-		if err != nil {
-			log.Error(err, "Could not allocate IP for cluster")
-			return nil, err
+	if hostRecord != nil {
+		for _, addr := range hostRecord.Ipv4Addrs {
+			a := net.ParseIP(addr.Ipv4Addr)
+			if subnet.Contains(a) {
+				log.Info("IP Address already assigned to cluster")
+				return a, nil
+			}
 		}
-		log.Info("IP address allocated successfully to cluster")
-		return net.ParseIP(hostRecord.Ipv4Addr), err
 	}
+
+	log.Info("No IP allocated to cluster, allocating IP")
+	ea := make(ibclient.EA)
+	hostRecord, err = objMgr.CreateHostRecord(true, deviceFQDN, networkView, "default."+networkView, subnet.String(), "", "", ea)
+	if err != nil {
+		log.Error(err, "Could not allocate IP for cluster")
+		return nil, err
+	}
+	log.Info("IP address allocated successfully to cluster")
+	return net.ParseIP(hostRecord.Ipv4Addr), err
 }
 
 // ReleaseIP releases a single IP address within a subnet that's assigned to a cluster.
