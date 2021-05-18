@@ -5,4 +5,4 @@ metadata:
   namespace: schiff-system
 spec:
   interval: 5m
-  url: https://harbor.sce-dcn.net/chartrepo/helm-kyverno
+  url: https://harbor.das-schiff.io/chartrepo/helm-kyverno
