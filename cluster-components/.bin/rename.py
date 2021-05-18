@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# @author: marcel.fest<at>telekom.de
+# @author: marcel.fest<at>live.de
 # @requires pyyaml
 ## Example:
 # .bin/rename.py --pattern '^(.*?)(-configmap)(.*?\.yaml)$' --substitution '\1\3'
