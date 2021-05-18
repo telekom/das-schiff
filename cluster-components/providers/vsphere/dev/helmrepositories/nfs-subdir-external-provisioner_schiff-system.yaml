@@ -1,0 +1,8 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: nfs-subdir-external-provisioner
+  namespace: schiff-system
+spec:
+  interval: 5m
+  url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner

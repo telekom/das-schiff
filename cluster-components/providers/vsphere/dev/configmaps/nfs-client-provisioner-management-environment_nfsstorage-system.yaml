@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfs-client-provisioner-management-environment
+  namespace: nfsstorage-system
+data:
+  values.yaml: |
+    image:
+      repository: gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner
+      tag: v4.0.1

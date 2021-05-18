@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-customer
+  namespace: monitoring-system
+data:
+  values.yaml: |
+    prometheus:
+      externalLabels:
+        platform_customer: customer-shortname

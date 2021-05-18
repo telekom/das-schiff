@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-site
+  namespace: monitoring-system
+data:
+  values.yaml: |
+    alertmanager:
+      config:
+        global:
+          smtp_smarthost: <url for smtp host:587>

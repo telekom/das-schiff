@@ -1,0 +1,27 @@
+apiVersion: rbacmanager.reactiveops.io/v1beta1
+kind: RBACDefinition
+metadata:
+  name: das-schiff-rbac-manager-admins
+rbacBindings:
+  - name: clusteradmins
+    subjects:
+      - kind: Group
+        name: schiff-emergency
+    clusterRoleBindings:
+      - clusterRole: cluster-admin        
+  - name: poweradmins
+    subjects:
+      - kind: Group
+        name: schiff-m2m
+    clusterRoleBindings:
+      - clusterRole: poweruser-full
+      - clusterRole: readonly-full
+      - clusterRole: schiff-m2m
+  - name: admins
+    subjects:
+      - kind: Group
+        name: schiff-admin
+    clusterRoleBindings:
+      - clusterRole: readonly-full
+      - clusterRole: poweruser-flux-crds
+      - clusterRole: poweruser-capi-crds

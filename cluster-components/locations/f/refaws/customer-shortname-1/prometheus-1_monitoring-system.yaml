@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: management-system
+    nginx.ingress.kubernetes.io/auth-realm: Authentication Required
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-type: basic
+  labels:
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/instance: kube-prometheus
+    app.kubernetes.io/name: prometheus
+  name: prometheus-1
+  namespace: monitoring-system
+spec:
+  rules:
+  - host: prometheus-1.customer-shortname-1.refaws.f.das-schiff.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: prometheus-1
+            port:
+              name: web
+        path: /federate
+        pathType: Prefix

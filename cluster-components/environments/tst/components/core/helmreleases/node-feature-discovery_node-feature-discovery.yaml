@@ -1,0 +1,24 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: node-feature-discovery
+  namespace: node-feature-discovery
+spec:
+  releaseName: node-feature-discovery
+  interval: 5m
+  chart:
+    spec:
+      chart: node-feature-discovery
+      version: '0.8.x'
+      sourceRef:
+        kind: HelmRepository
+        name: schiff-meta
+        namespace: schiff-system
+      interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: node-feature-discovery-default
+    - kind: ConfigMap
+      name: node-feature-discovery-cluster
+      optional: true

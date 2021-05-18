@@ -1,0 +1,37 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nginx-ingress-controller-management
+  namespace: ingress-system
+spec:
+  releaseName: management
+  interval: 5m
+  chart:
+    spec:
+      chart: nginx-ingress-controller
+      version: '7.6.x'
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: schiff-system
+      interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: nginx-ingress-controller-default
+      optional: true
+    - kind: ConfigMap
+      name: nginx-ingress-controller-management-default
+      optional: true
+    - kind: ConfigMap
+      name: nginx-ingress-controller-site
+      optional: true
+    - kind: ConfigMap
+      name: nginx-ingress-controller-management-site
+      optional: true
+    - kind: ConfigMap
+      name: nginx-ingress-controller-cluster
+      optional: true
+    - kind: ConfigMap
+      name: nginx-ingress-controller-management-cluster
+      optional: true

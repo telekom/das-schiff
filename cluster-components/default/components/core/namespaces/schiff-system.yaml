@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: schiff-system
+  labels:
+    name: schiff-system
+    platform.das-schiff.io/name: schiff-system
+    owner: das-schiff
+    platform.das-schiff.io/owner: das-schiff

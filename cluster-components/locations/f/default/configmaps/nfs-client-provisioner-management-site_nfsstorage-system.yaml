@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfs-client-provisioner-management-site
+  namespace: nfsstorage-system
+data:
+  values.yaml: |
+    nfs:
+      server: <nfs endpoint>

@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: node-feature-discovery
+  labels:
+    name: node-feature-discovery
+    platform.das-schiff.io/name: node-feature-discovery
+    owner: das-schiff
+    platform.das-schiff.io/owner: das-schiff
+

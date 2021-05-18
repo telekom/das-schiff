@@ -1,0 +1,8 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: stable
+  namespace: schiff-system
+spec:
+  interval: 5m
+  url: https://charts.helm.sh/stable

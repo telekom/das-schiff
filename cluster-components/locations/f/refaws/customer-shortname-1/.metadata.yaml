@@ -1,0 +1,10 @@
+metadata:
+  cluster: customer-shortname-1
+  customer: customer-shortname
+  environment: ref
+  environment_site: refaws
+  fqdn: customer-shortname-1.refaws.f.das-schiff.io
+  location: f
+  network_zone: m2m
+  provider: vsphere
+  site: aws

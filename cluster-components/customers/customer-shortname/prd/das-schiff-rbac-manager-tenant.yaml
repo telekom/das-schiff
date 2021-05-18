@@ -1,0 +1,39 @@
+apiVersion: rbacmanager.reactiveops.io/v1beta1
+kind: RBACDefinition
+metadata:
+  name: das-schiff-rbac-manager-tenant
+rbacBindings:
+  - name: customer-shortname-admins
+    subjects:
+      - kind: Group
+        name: customer-shortname-poweruser
+    roleBindings:
+      - clusterRole: poweruser-plus
+        namespaceSelector:
+          matchExpressions:
+            - key: platform.das-schiff.io/owner
+              operator: NotIn
+              values:
+                - das-schiff
+    clusterRoleBindings:
+      - clusterRole: customer-m2m # temporary non production for the A4 guys. As in the email with Robert Souckup we will not operate it or support it.
+  - name: customer-shortname-collaborators
+    subjects:
+      - kind: Group
+        name: customer-shortname-collaborator
+    roleBindings:
+      - clusterRole: poweruser-base
+        namespaceSelector:
+          matchExpressions:
+            - key: platform.das-schiff.io/owner
+              operator: NotIn
+              values:
+                - das-schiff
+    clusterRoleBindings:
+      - clusterRole: readonly-base
+  - name: customer-shortname-readonly
+    subjects:
+      - kind: Group
+        name: customer-shortname-readonly
+    clusterRoleBindings:
+      - clusterRole: readonly-base
