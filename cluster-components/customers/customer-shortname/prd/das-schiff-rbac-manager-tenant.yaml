@@ -16,7 +16,7 @@ rbacBindings:
               values:
                 - das-schiff
     clusterRoleBindings:
-      - clusterRole: customer-m2m # temporary non production for the A4 guys. As in the email with Robert Souckup we will not operate it or support it.
+      - clusterRole: customer-m2m
   - name: customer-shortname-collaborators
     subjects:
       - kind: Group
