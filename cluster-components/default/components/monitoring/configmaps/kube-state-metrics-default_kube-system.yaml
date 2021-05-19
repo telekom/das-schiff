@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-state-metrics-default
+  namespace: kube-system
+data:
+  values.yaml: |
+    replicaCount: 1
+    serviceMonitor:
+      enabled: true
+      honorLabels: true
+      jobLabel: "app.kubernetes.io/name"
+    hostNetwork: false

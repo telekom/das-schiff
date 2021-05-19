@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-environment
+  namespace: monitoring-system
+data:
+  values.yaml: |
+    prometheus:
+      externalLabels:
+        platform_environment: prd

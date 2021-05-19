@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    role: default
+  name: kubernetes-system-alerts
+  namespace: monitoring-system
+spec:
+  groups:
+    - name: kubernetes-system
+      rules:
+        - alert: KubeVersionMismatch
+          annotations:
+            description: There are {{ $value }} different semantic versions of Kubernetes
+              components running.
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeversionmismatch
+            summary: Different semantic versions of Kubernetes components running.
+          expr: |
+            count(count by (gitVersion) (label_replace(kubernetes_build_info{job!~"kube-dns|coredns"},"gitVersion","$1","gitVersion","(v[0-9]*.[0-9]*).*"))) > 1
+          for: 15m
+          labels:
+            severity: Warning
+        - alert: KubeClientErrors
+          annotations:
+            description: Kubernetes API server client '{{ $labels.job }}/{{ $labels.instance
+              }}' is experiencing {{ $value | humanizePercentage }} errors.'
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclienterrors
+            summary: Kubernetes API server client is experiencing errors.
+          expr: |
+            (sum(rate(rest_client_requests_total{code=~"5.."}[5m])) by (instance, job)
+              /
+            sum(rate(rest_client_requests_total[5m])) by (instance, job))
+            > 0.01
+          for: 15m
+          labels:
+            severity: Warning

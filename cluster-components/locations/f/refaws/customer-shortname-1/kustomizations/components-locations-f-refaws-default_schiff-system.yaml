@@ -1,0 +1,17 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: components-locations-f-refaws-default
+  namespace: schiff-system
+spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg-schiff
+  interval: 5m
+  path: ./locations/f/refaws/default
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: components
+  timeout: 2m

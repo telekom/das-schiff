@@ -1,0 +1,41 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prometheus-operator
+  namespace: monitoring-system
+spec:
+  releaseName: prometheus-operator
+  interval: 5m
+  install:
+    skipCRDs: true
+  chart:
+    spec:
+      chart: kube-prometheus
+      version: '4.3.x'
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: schiff-system
+      interval: 1m
+  valuesFrom:
+  - kind: ConfigMap
+    name: prometheus-operator-default
+  - kind: ConfigMap
+    name: prometheus-operator-environment
+    optional: True
+  - kind: ConfigMap
+    name: prometheus-operator-site
+    optional: True
+  - kind: ConfigMap
+    name: prometheus-operator-customer-default
+    optional: True
+  - kind: ConfigMap
+    name: prometheus-operator-customer
+    optional: True
+  - kind: ConfigMap
+    name: prometheus-operator-cluster
+    optional: True
+
+
+

@@ -1,0 +1,74 @@
+
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: components
+  namespace: schiff-system
+spec:
+  interval: 5m
+  url: ssh://git@github.com/telekom/das-schiff.git
+  ref:
+    branch: main
+  secretRef:
+    name: gotk-ssh-key-schiff
+  ignore: |
+    ##
+    ## :exclude: all
+    /*
+
+    ## 
+    ## :include: default
+    !/default
+
+    ##
+    ## :include: Environment default for environment ref
+    !/environments/ref
+
+    ##
+    ## :include: Providers default
+    !/providers/default
+
+    ##
+    ## :include: Providers vsphere default
+    !/providers/vsphere/default
+    
+    ##
+    ## :include: Providers vsphere default for environment ref
+    !/providers/vsphere/ref
+
+    ##
+    ## :include: Zones default
+    !/network-zones/default
+
+    ##
+    ## :include: Zones environment-defaults
+    !/network-zones/environment-defaults
+
+    ##
+    ## :include: Zones default for zone m2m
+    !/network-zones/m2m/default
+
+    ##
+    ## :include: Zones default for zone m2m for environment ref
+    !/network-zones/m2m/ref
+
+    ##
+    ## :include: Sites default for site refsa1
+    !/locations/bn/refsa1/default
+
+    ##
+    ## :include: Cluster a4-1 default for site refsa1
+    !/locations/bn/refsa1/a4-1
+
+    ##
+    ## :include: Customer a4 default
+    !/customers/a4/default
+
+    ##
+    ## :include: Customer a4 default for ref
+    !/customers/a4/ref
+
+    ##
+    ## :exclude: the metadata information
+    **/.metadata.yaml

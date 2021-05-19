@@ -1,0 +1,26 @@
+resources:
+# - ../default/
+- ../../environment-defaults/ref/
+commonLabels:
+  schiff.io/source: "network-zones-m2m-ref"
+  das-schiff.io/source: "network-zones-m2m-ref"
+  source: "network-zones-m2m-ref"
+  schiff.io/owner: "das-schiff"
+  das-schiff.io/owner: "das-schiff"
+  owner: "das-schiff"
+images:
+  - name: fluxcd/helm-controller
+    newName: harbor.das-schiff.io/hub.docker.com/fluxcd/helm-controller
+  - name: fluxcd/image-automation-controller
+    newName: harbor.das-schiff.io/hub.docker.com/fluxcd/image-automation-controller
+  - name: fluxcd/image-reflector-controller
+    newName: harbor.das-schiff.io/hub.docker.com/fluxcd/image-reflector-controller
+  - name: fluxcd/kustomize-controller
+    newName: harbor.das-schiff.io/hub.docker.com/fluxcd/kustomize-controller
+  - name: fluxcd/notification-controller
+    newName: harbor.das-schiff.io/hub.docker.com/fluxcd/notification-controller
+  - name: fluxcd/source-controller
+    newName: harbor.das-schiff.io/hub.docker.com/fluxcd/source-controller
+patchesStrategicMerge:
+  - notification-controller_flux-system.yaml
+  - source-controller_flux-system.yaml

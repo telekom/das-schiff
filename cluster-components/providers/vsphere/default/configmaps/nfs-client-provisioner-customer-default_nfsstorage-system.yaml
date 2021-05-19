@@ -1,0 +1,80 @@
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfs-client-provisioner-customer-default
+  namespace: nfsstorage-system
+data:
+  values.yaml: |
+    # Default values for nfs-client-provisioner.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+
+    replicaCount: 1
+    strategyType: Recreate
+
+    image:
+      repository: harbor.das-schiff.io/gcr/nfs-subdir-external-provisioner
+      tag: 1.20-temporary
+      pullPolicy: IfNotPresent
+
+    nfs:
+      mountOptions:
+        - nfsvers=4.1
+
+    # For creating the StorageClass automatically:
+    storageClass:
+      create: true
+
+      # Set a provisioner name. If unset, a name will be generated.
+      provisionerName: nfs-user-storage
+
+      # Set StorageClass as the default StorageClass
+      # Ignored if storageClass.create is false
+      defaultClass: true
+
+      # Set a StorageClass name
+      # Ignored if storageClass.create is false
+      name: nfs-user
+
+      # Allow volume to be expanded dynamically
+      allowVolumeExpansion: true
+
+      # Method used to reclaim an obsoleted volume
+      reclaimPolicy: Delete
+
+      # When set to false your PVs will not be archived by the provisioner upon deletion of the PVC.
+      archiveOnDelete: true
+
+    ## For RBAC support:
+    rbac:
+      # Specifies whether RBAC resources should be created
+      create: true
+
+    # If true, create & use Pod Security Policy resources
+    # https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+    podSecurityPolicy:
+      enabled: false
+
+    serviceAccount:
+      # Specifies whether a ServiceAccount should be created
+      create: true
+
+      # The name of the ServiceAccount to use.
+      # If not set and create is true, a name is generated using the fullname template
+      name: nfs-client-provisioner
+
+    resources: {}
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
+
+    nodeSelector: {}
+
+    tolerations: []
+
+    affinity: {}

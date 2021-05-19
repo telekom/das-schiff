@@ -344,6 +344,9 @@ cluster-components
         ... # Same as above
 
 ```
+
+One concrete example of `cluster-components` repo can be found here: https://github.com/telekom/das-schiff/tree/main/cluster-components 
+
 ## Some public presentations
 - [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)
 - [Talking about Das Schiff in Semaphore Uncut with Darko Fabijan](https://semaphoreci.com/blog/cloud-native-adoption-vuk-gojnic)

@@ -1,0 +1,21 @@
+# apiVersion: monitoring.coreos.com/v1
+# kind: PrometheusRule
+# metadata:
+#   labels:
+#     role: default
+#   name: kubernetes-system-scheduler.alerts
+#   namespace: monitoring-system
+# spec:
+#   groups:
+#     - name: kubernetes-system-scheduler
+#       rules:
+#         - alert: KubeSchedulerDown
+#           annotations:
+#             description: KubeScheduler has disappeared from Prometheus target discovery.
+#             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeschedulerdown
+#             summary: Target disappeared from Prometheus target discovery.
+#           expr: |
+#             absent(up{job="kube-scheduler"} == 1)
+#           for: 15m
+#           labels:
+#             severity: Critical

@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-cluster
+  namespace: monitoring-system
+data:
+  values.yaml: |
+    prometheus:
+      externalLabels:
+        ## Due To metric_name{label_name} restrictions we cannot use platform.das-schiff.io/label_name
+        ## The conversion is as following:
+        ## platform_customer -> platform.das-schiff.io/customer
+        ## platform_fqdn is the unique infra handle for the cluster.
+        cluster: customer-shortname-1.refaws.f.das-schiff.io
+        platform_fqdn: customer-shortname-1.refaws.f.das-schiff.io

@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gotk-system
+  labels:
+    name: gotk-system
+    platform.das-schiff.io/name: gotk-system
+    owner: das-schiff
+    platform.das-schiff.io/owner: das-schiff
+    app.kubernetes.io/instance: gotk-system
+    app.kubernetes.io/version: latest

@@ -1,0 +1,9 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: schiff-public
+  namespace: schiff-system
+spec:
+  url: https://harbor.sce-dcn.net/chartrepo/schiff-public
+  interval: 5m

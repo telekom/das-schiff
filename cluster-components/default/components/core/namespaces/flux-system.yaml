@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system
+  labels:
+    name: flux-system
+    platform.das-schiff.io/name: flux-system
+    owner: das-schiff
+    platform.das-schiff.io/owner: das-schiff
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/version: latest

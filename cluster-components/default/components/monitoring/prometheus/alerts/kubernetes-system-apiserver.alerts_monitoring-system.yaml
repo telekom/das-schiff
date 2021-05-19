@@ -1,0 +1,64 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    role: default
+  name: kubernetes-system-apiserver.alerts
+  namespace: monitoring-system
+spec:
+  groups:
+    - name: kubernetes-system-apiserver
+      rules:
+        - alert: KubeClientCertificateExpiration
+          annotations:
+            description: A client certificate used to authenticate to the apiserver
+              is expiring in less than 7.0 days.
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclientcertificateexpiration
+            summary: Client certificate is about to expire.
+          expr: |
+            apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and on(job) histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 604800
+          labels:
+            severity: Warning
+        - alert: KubeClientCertificateExpiration
+          annotations:
+            description: A client certificate used to authenticate to the apiserver
+              is expiring in less than 24.0 hours.
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclientcertificateexpiration
+            summary: Client certificate is about to expire.
+          expr: |
+            apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and on(job) histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 86400
+          labels:
+            severity: Critical
+        - alert: AggregatedAPIErrors
+          annotations:
+            description: An aggregated API {{ $labels.name }}/{{ $labels.namespace
+              }} has reported errors. The number of errors have increased for it in
+              the past five minutes. High values indicate that the availability of
+              the service changes too often.
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-aggregatedapierrors
+            summary: An aggregated API has reported errors.
+          expr: |
+            sum by(name, namespace)(increase(aggregator_unavailable_apiservice_count[5m])) > 2
+          labels:
+            severity: Warning
+        - alert: AggregatedAPIDown
+          annotations:
+            description: An aggregated API {{ $labels.name }}/{{ $labels.namespace
+              }} has been only {{ $value | humanize }}% available over the last 10m.
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-aggregatedapidown
+            summary: An aggregated API is down.
+          expr: |
+            (1 - max by(name, namespace)(avg_over_time(aggregator_unavailable_apiservice[10m]))) * 100 < 85
+          for: 5m
+          labels:
+            severity: Warning
+        - alert: KubeAPIDown
+          annotations:
+            description: KubeAPI has disappeared from Prometheus target discovery.
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapidown
+            summary: Target disappeared from Prometheus target discovery.
+          expr: |
+            absent(up{job="apiserver"} == 1)
+          for: 15m
+          labels:
+            severity: Critical

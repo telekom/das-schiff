@@ -1,0 +1,20 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: customer-components
+  namespace: schiff-system
+spec:
+  interval: 5m
+  url: ssh://git@github.com/telekom/cluster-components-customer-shortname.git  # example does not exist.
+  ref:
+    branch: main
+  secretRef:
+    name: gotk-ssh-key-schiff
+  ignore: |
+    # Exclude all
+    /*
+    # Include default
+    !/default
+    # Include cluster-specific config
+    !/clusters
