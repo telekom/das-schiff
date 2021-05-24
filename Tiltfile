@@ -1,4 +1,9 @@
 load('ext://restart_process', 'docker_build_with_restart')
+load('ext://cert_manager', 'deploy_cert_manager')
+def capi():
+    local("sops -d clusterctl.yaml > tmp.yaml")
+    local("clusterctl init --infrastructure=docker,vsphere --config tmp.yaml")
+    local("rm tmp.yaml")
 
 def kubebuilder(DOMAIN, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'):
 
@@ -36,20 +41,19 @@ def kubebuilder(DOMAIN, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersi
     
     # if os.path.exists('api') == False:
     #     local("kubebuilder create api --resource --controller --group %s --version %s --kind %s" % (GROUP, VERSION, KIND))
-    
+
     local(manifests() + generate())
-    
+
+    #local_resource('CAPI CRDs', 'kubectl apply -f ./config/crd/testing', deps=["./config/crd/testing"])
     #local_resource('CRD', manifests() + 'kustomize build config/crd | kubectl apply -f -', deps=["api"])
     
     k8s_yaml(yaml())
     
     deps = ['controllers', 'main.go']
     deps.append('api')
-    
     local_resource('Watch&Compile', generate() + binary(), deps=deps, ignore=['*/*/zz_generated.deepcopy.go'])
     
     local_resource('Sample YAML', 'kubectl apply -f ./config/samples/', deps=["./config/samples"], resource_deps=[DIRNAME + "-controller-manager"])
-    local_resource('CAPI CRDs', 'kubectl apply -f ./config/crd/testing', deps=["./config/crd/testing"], resource_deps=[DIRNAME + "-controller-manager"])
 
     docker_build_with_restart(IMG, '.', 
      dockerfile_contents=DOCKERFILE,
@@ -59,4 +63,6 @@ def kubebuilder(DOMAIN, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersi
            sync('./bin/manager', '/manager'),
        ]
     )
+deploy_cert_manager(version = "v1.1.0")
+capi()
 kubebuilder("schiff.telekom.de") 
