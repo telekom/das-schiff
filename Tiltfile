@@ -2,7 +2,7 @@ load('ext://restart_process', 'docker_build_with_restart')
 load('ext://cert_manager', 'deploy_cert_manager')
 def capi():
     local("sops -d clusterctl.yaml > tmp.yaml")
-    local("clusterctl init --infrastructure=docker,vsphere --config tmp.yaml")
+    local("./capi.sh")
     local("rm tmp.yaml")
 
 def kubebuilder(DOMAIN, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'):
