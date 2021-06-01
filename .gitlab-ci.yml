@@ -34,8 +34,15 @@ binary:
 test:
   stage: test
   extends: .go
+  variables:
+    ENVTEST_ASSETS_DIR: $CI_PROJECT_DIR/testbin
   script:
-    - make test
+    - make generate manifests
+    - mkdir -p $ENVTEST_ASSETS_DIR
+    - source hack/setup-envtest.sh
+    - fetch_envtest_tools $ENVTEST_ASSETS_DIR
+    - setup_envtest_env $ENVTEST_ASSETS_DIR
+    - go test ./... -coverprofile cover.out
     - go tool cover -func cover.out | grep total
 
 container-image:
