@@ -86,3 +86,7 @@ release-image:
       --build-arg https_proxy=$https_proxy
       --build-arg no_proxy=$no_proxy
       --build-arg VERSION=${CI_COMMIT_TAG:1}
+  artifacts:
+    paths:
+      - /kaniko/.docker/config.json
+      - /kaniko/.docker/*
