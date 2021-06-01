@@ -63,11 +63,17 @@ release-image:
     entrypoint: [""]
   only:
     - tags
+  before_script:
+    - 'echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}," > /kaniko/.docker/config.json'
+    - 'echo "\"$ARTIFACTORY_URL\":{\"username\":\"$ARTIFACTORY_USERNAME\",\"password\":\"$ARTIFACTORY_TOKEN\"}," >> /kaniko/.docker/config.json'
+    - 'echo "\"harbor.das-schiff.telekom.de\":{\"auth\":\"$HARBOR_TOKEN\"}}," >> /kaniko/.docker/config.json'
+    - 'echo "\"proxies\": { \"default\": { \"httpProxy\": \"${http_proxy}\", \"httpsProxy\": \"${https_proxy}\", \"noProxy\": \"${no_proxy}\"}}}" >> /kaniko/.docker/config.json'
   script:
     - /kaniko/executor
       --context $CI_PROJECT_DIR
       --dockerfile $CI_PROJECT_DIR/Dockerfile
       --destination $IMAGE_NAME:${CI_COMMIT_TAG:1}
+      --destination harbor.das-schiff.telekom.de/schiff/schiff-operator:${CI_COMMIT_TAG:1}
       --cache=true --cache-repo $IMAGE_NAME
       --build-arg http_proxy=$http_proxy
       --build-arg https_proxy=$https_proxy
