@@ -73,7 +73,7 @@ release-image:
     
   before_script:
     - 'echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}," > /kaniko/.docker/config.json'
-    - 'echo "\"artifactory.devops.telekom.de\":{\"username\":\"$ARTIFACTORY_USERNAME\",\"password\":\"$ARTIFACTORY_TOKEN\"}," >> /kaniko/.docker/config.json'
+#    - 'echo "\"artifactory.devops.telekom.de\":{\"username\":\"$ARTIFACTORY_USERNAME\",\"password\":\"$ARTIFACTORY_TOKEN\"}," >> /kaniko/.docker/config.json'
     - 'echo "\"harbor.das-schiff.telekom.de\":{\"auth\":\"$HARBOR_TOKEN\"}}," >> /kaniko/.docker/config.json'
     - 'echo "\"proxies\": { \"default\": { \"httpProxy\": \"${http_proxy}\", \"httpsProxy\": \"${https_proxy}\", \"noProxy\": \"${no_proxy}\"}}}" >> /kaniko/.docker/config.json'
     - cat  /kaniko/.docker/config.json
