@@ -57,7 +57,8 @@ func main() {
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	logger := zap.New(zap.UseFlagOptions(&opts))
+	ctrl.SetLogger(logger)
 
 	setupLog.Info("loading configuration", "explicit path", configFile)
 	config.Load(configFile)
@@ -79,7 +80,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("VSphereMachine"),
 		Scheme: mgr.GetScheme(),
-		IPAM:   &infoblox.Manager{Log: ctrl.Log.Logger},
+		IPAM:   &infoblox.Manager{Log: logger},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VSphereMachine")
 		os.Exit(1)
