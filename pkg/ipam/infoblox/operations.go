@@ -1,6 +1,7 @@
 package infoblox
 
 import (
+	"errors"
 	"fmt"
 	"net"
 
@@ -57,7 +58,7 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 
 	hostRecord, err := objMgr.GetHostRecord(deviceFQDN)
 	if err != nil {
-		log.Error(err, "Could not get assigned IP address for cluster")
+		log.Error(err, "Could not get assigned IP address")
 	}
 	if hostRecord != nil {
 		if addr := findIP(hostRecord.Ipv4Addrs, subnet); addr != nil {
@@ -73,11 +74,11 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 		hostRecord.Ipv4Addrs = append(hostRecord.Ipv4Addrs, *ipv4Addr)
 		ref, err := conn.UpdateObject(hostRecord, hostRecord.Ref)
 		if err != nil {
-			log.Error(err, "Could not allocate IP for cluster")
+			log.Error(err, "Could not allocate IP")
 			return nil, err
 		}
 		if hostRecord, err = objMgr.GetHostRecordByRef(ref); err != nil {
-			log.Error(err, "Could not allocate IP for cluster")
+			log.Error(err, "Could not allocate IP")
 			return nil, err
 		}
 		return findIP(hostRecord.Ipv4Addrs, subnet), nil
@@ -87,7 +88,7 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 	ea := make(ibclient.EA)
 	hostRecord, err = objMgr.CreateHostRecord(true, deviceFQDN, networkView, "default."+networkView, subnet.String(), "", "", ea)
 	if err != nil {
-		log.Error(err, "Could not allocate IP for cluster")
+		log.Error(err, "Could not allocate IP")
 		return nil, err
 	}
 	log.Info("IP address allocated successfully to cluster")
@@ -116,13 +117,18 @@ func (m *Manager) ReleaseAllIPs(deviceName, networkView string) error {
 	objMgr.OmitCloudAttrs = true // Needs to be set for on-prem version of Infoblox
 	hostRecord, err := objMgr.GetHostRecord(deviceName)
 	if err != nil {
-		log.Error(err, "Could not release IP for cluster")
+		log.Error(err, "Could not release IPs")
+		return err
+	}
+	if hostRecord == nil {
+		err := errors.New("no host record found")
+		log.Error(err, "Could not release IPs")
 		return err
 	}
 	if _, err = objMgr.DeleteHostRecord(hostRecord.Ref); err != nil {
-		log.Error(err, "Could not release IP for cluster")
+		log.Error(err, "Could not release IPs")
 		return err
 	}
-	log.Info("IP address released for cluster")
+	log.Info("IP addresss released")
 	return nil
 }
