@@ -104,9 +104,9 @@ func findIP(addrs []ibclient.HostRecordIpv4Addr, subnet *net.IPNet) net.IP {
 	return nil
 }
 
-// ReleaseIP releases a single IP address within a subnet that's assigned to a cluster.
-func (m *Manager) ReleaseIP(deviceName, networkView string, subnet *net.IPNet) error {
-	log := m.Log.WithValues("subnet", subnet.String())
+// ReleaseAllIPs releases all IPs for a host with the provided deviceName
+func (m *Manager) ReleaseAllIPs(deviceName, networkView string) error {
+	log := m.Log.WithValues("device", deviceName)
 	conn, err := m.getIBConnector()
 	if err != nil {
 		return err
@@ -114,11 +114,15 @@ func (m *Manager) ReleaseIP(deviceName, networkView string, subnet *net.IPNet) e
 	defer conn.Logout()
 	objMgr := ibclient.NewObjectManager(conn, "myclient", "")
 	objMgr.OmitCloudAttrs = true // Needs to be set for on-prem version of Infoblox
-	_, err = objMgr.ReleaseIP(networkView, subnet.String(), "", "")
+	hostRecord, err := objMgr.GetHostRecord(deviceName)
 	if err != nil {
 		log.Error(err, "Could not release IP for cluster")
 		return err
 	}
+	if _, err = objMgr.DeleteHostRecord(hostRecord.Ref); err != nil {
+		log.Error(err, "Could not release IP for cluster")
+		return err
+	}
 	log.Info("IP address released for cluster")
-	return err
+	return nil
 }

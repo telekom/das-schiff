@@ -102,8 +102,16 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		if hasFinalizer {
 			log.Info("machine deleted, releasing ip")
 			errs := []error{}
+			type ibhost struct {
+				fqdn    string
+				netview string
+			}
+			hosts := map[ibhost]struct{}{}
 			for _, i := range interfaces {
-				err := r.IPAM.ReleaseIP(machineName+"."+i.dnsZone, i.infobloxNetworkView, i.subnet)
+				hosts[ibhost{fqdn: machineName + "." + i.dnsZone, netview: i.infobloxNetworkView}] = struct{}{}
+			}
+			for h := range hosts {
+				err := r.IPAM.ReleaseAllIPs(h.fqdn, h.netview)
 				if err != nil {
 					log.Error(err, "failed to release ip address")
 					errs = append(errs, err)

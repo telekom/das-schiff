@@ -78,11 +78,15 @@ var _ = Describe("VSphereMachine IPAM controller", func() {
 			allocated := false
 			released := false
 			ipamManager.Callback = func(t, id, networkView string, subnet *net.IPNet) {
-				ctrl.Log.Info("ipam callback", "deviceName", id, "networkView", networkView, "subnet", subnet.String())
-				if id != MachineName+"."+DNSZone || networkView != NetworkView || subnet.String() != TestSubnet.String() {
+				subnetStr := ""
+				if subnet != nil {
+					subnetStr = subnet.String()
+				}
+				ctrl.Log.Info("ipam callback", "deviceName", id, "networkView", networkView, "subnet", subnetStr)
+				if id != MachineName+"."+DNSZone || networkView != NetworkView {
 					return
 				}
-				if t == "GetOrAllocate" {
+				if t == "GetOrAllocate" && subnetStr == TestSubnet.String() {
 					allocated = true
 				}
 				if t == "ReleaseIP" {

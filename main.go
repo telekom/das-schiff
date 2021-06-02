@@ -79,7 +79,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("VSphereMachine"),
 		Scheme: mgr.GetScheme(),
-		IPAM:   &infoblox.Manager{},
+		IPAM:   &infoblox.Manager{Log: ctrl.Log.Logger},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VSphereMachine")
 		os.Exit(1)

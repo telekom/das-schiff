@@ -25,9 +25,9 @@ func (m *Manager) GetOrAllocateIP(identifier, networkView string, subnet *net.IP
 	return ip, nil
 }
 
-func (m *Manager) ReleaseIP(identifier, networkView string, subnet *net.IPNet) error {
+func (m *Manager) ReleaseAllIPs(identifier, networkView string) error {
 	if m.Callback != nil {
-		m.Callback("ReleaseIP", identifier, networkView, subnet)
+		m.Callback("ReleaseIP", identifier, networkView, nil)
 	}
 	return nil
 }
