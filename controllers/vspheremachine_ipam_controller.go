@@ -183,7 +183,7 @@ func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphe
 	}
 
 	desiredIP, err := r.IPAM.GetOrAllocateIP(machineName+"."+i.dnsZone, i.infobloxNetworkView, i.subnet)
-	if err != nil {
+	if err != nil && desiredIP != nil {
 		log.Error(err, "failed to retrieve desired IP")
 		return false, err
 	}
