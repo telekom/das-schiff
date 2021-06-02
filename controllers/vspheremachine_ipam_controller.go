@@ -112,7 +112,8 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 			}
 			for h := range hosts {
 				err := r.IPAM.ReleaseAllIPs(h.fqdn, h.netview)
-				if err != nil {
+				// possible toDo: validate all IPs are actually free and no other host claims tem before releasing
+				if err != nil && err.Error() != "no host record found" {
 					log.Error(err, "failed to release ip address")
 					errs = append(errs, err)
 				}
@@ -135,6 +136,16 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, nil
 	}
 
+	//always set finalizers before perforin any creation action in IPAM
+	if !hasFinalizer {
+		controllerutil.AddFinalizer(&vSphereMachine, finalizer)
+		err := r.Client.Update(ctx, &vSphereMachine)
+		if err != nil {
+			log.Error(err, "failed to add finalizer to VSphereMachine")
+			return ctrl.Result{}, err
+		}
+	}
+
 	changed := false
 	for _, i := range interfaces {
 		c, err := r.reconcileInterface(log, &vSphereMachine, machineName, i)
@@ -142,11 +153,6 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 			return ctrl.Result{}, err
 		}
 		changed = changed || c
-	}
-
-	if !hasFinalizer {
-		controllerutil.AddFinalizer(&vSphereMachine, finalizer)
-		changed = true
 	}
 
 	if changed {
@@ -162,7 +168,7 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphereMachine *v1alpha3.VSphereMachine, machineName string, i interfaceConfig) (
 	changed bool, err error) {
-
+	log = log.WithValues("subnet", i.subnet)
 	dev, devIdx := getDeviceByNetworkName(vSphereMachine.Spec.Network.Devices, i.networkName)
 	if devIdx < 0 {
 		err := errors.New("device with annotated network name not found")
@@ -172,7 +178,7 @@ func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphe
 
 	if dev.DHCP4 || dev.DHCP6 {
 		err := errors.New("dhcp enabled on device")
-		log.Error(err, "could set manual IP")
+		log.Error(err, "could not set manual IP")
 		return false, err
 	}
 
