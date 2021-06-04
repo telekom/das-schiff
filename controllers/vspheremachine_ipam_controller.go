@@ -198,14 +198,16 @@ func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphe
 	}
 
 	if !exists {
-		prefix, _ := i.subnet.Mask.Size()
-		cidr := fmt.Sprintf("%v/%v", desiredIP.String(), prefix)
-		if len(vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs) != 0 {
-			log.V(4).WithValues("ipAddresses", vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs).Info("already existing ips are ")
+		if desiredIP != nil {
+			prefix, _ := i.subnet.Mask.Size()
+			cidr := fmt.Sprintf("%v/%v", desiredIP.String(), prefix)
+			if len(vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs) != 0 {
+				log.V(4).WithValues("ipAddresses", vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs).Info("already existing ips are ")
+			}
+			log.WithValues("ipAddress", cidr).Info("adding allocated ip address to machine")
+			vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs = append(dev.IPAddrs, cidr)
+			changed = true
 		}
-		log.WithValues("ipAddress", cidr).Info("adding allocated ip address to machine")
-		vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs = append(dev.IPAddrs, cidr)
-		changed = true
 	}
 	return
 }
