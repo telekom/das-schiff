@@ -156,11 +156,14 @@ func (r *VSphereMachineIPAMReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	if changed {
+		log.Info("Trying to update vSphereMachine")
+
 		err := r.Client.Update(ctx, &vSphereMachine)
 		if err != nil {
 			log.Error(err, "failed to update VSphereMachine")
 			return ctrl.Result{}, err
 		}
+
 	}
 
 	return ctrl.Result{}, nil
@@ -207,6 +210,9 @@ func (r *VSphereMachineIPAMReconciler) reconcileInterface(log logr.Logger, vSphe
 			log.WithValues("ipAddress", cidr).Info("adding allocated ip address to machine")
 			vSphereMachine.Spec.Network.Devices[devIdx].IPAddrs = append(dev.IPAddrs, cidr)
 			changed = true
+		} else {
+			err = errors.New("return form IPAM Warpper was invalid")
+			return false, err
 		}
 	}
 	return
