@@ -47,7 +47,7 @@ func (m *Manager) getIBConnector() (*ibclient.Connector, error) {
 // the next available IP address in the subnet.
 
 func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IPNet) (net.IP, error) {
-	log := m.Log.WithValues("subnet", subnet.String())
+	log := m.Log.WithValues("subnet", subnet.String()).WithValues("RequestFQDN", deviceFQDN).WithValues("RequestNetView", networkView)
 	conn, err := m.getIBConnector()
 	if err != nil {
 		log.Error(err, "Cannot initiate connection")
@@ -59,6 +59,7 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 	hostRecord, err := objMgr.GetHostRecord(deviceFQDN)
 	if err != nil {
 		log.Error(err, "Could not get assigned IP address")
+
 	}
 	if hostRecord != nil {
 		if addr := findIP(hostRecord.Ipv4Addrs, subnet); addr != nil {
@@ -75,6 +76,7 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 		ref, err := conn.UpdateObject(hostRecord, hostRecord.Ref)
 		if err != nil {
 			log.Error(err, "Could not allocate IP")
+
 			return nil, err
 		}
 		if hostRecord, err = objMgr.GetHostRecordByRef(ref); err != nil {
