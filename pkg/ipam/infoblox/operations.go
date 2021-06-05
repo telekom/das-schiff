@@ -75,6 +75,7 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 		// if a host record exists already, add a new address to it
 		ipv4Addr := ibclient.NewHostRecordIpv4Addr(ibclient.HostRecordIpv4Addr{Ipv4Addr: fmt.Sprintf("func:nextavailableip:%s,%s", subnet.String(), networkView)})
 		hostRecord.Ipv4Addrs = append(hostRecord.Ipv4Addrs, *ipv4Addr)
+		hostRecord.Zone = ""
 		ref, err := conn.UpdateObject(hostRecord, hostRecord.Ref)
 		if err != nil {
 			log.Error(err, "Could not allocate IP")
