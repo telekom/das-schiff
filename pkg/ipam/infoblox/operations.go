@@ -70,6 +70,8 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 
 	log.Info("No IP allocated to cluster, allocating IP")
 	if hostRecord != nil {
+		log.Info("Using existing HostRecord")
+		log = log.WithValues("hostRecord", hostRecord)
 		// if a host record exists already, add a new address to it
 		ipv4Addr := ibclient.NewHostRecordIpv4Addr(ibclient.HostRecordIpv4Addr{Ipv4Addr: fmt.Sprintf("func:nextavailableip:%s,%s", subnet.String(), networkView)})
 		hostRecord.Ipv4Addrs = append(hostRecord.Ipv4Addrs, *ipv4Addr)
@@ -88,6 +90,7 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 
 	// if there is no host record, create a new one
 	ea := make(ibclient.EA)
+	log.Info("Creating HostRecord")
 	hostRecord, err = objMgr.CreateHostRecord(true, deviceFQDN, networkView, "default."+networkView, subnet.String(), "", "", ea)
 	if err != nil {
 		log.Error(err, "Could not allocate IP")
@@ -95,6 +98,7 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 	}
 	log.Info("IP address allocated successfully to cluster")
 	return net.ParseIP(hostRecord.Ipv4Addr), err
+
 }
 
 func findIP(addrs []ibclient.HostRecordIpv4Addr, subnet *net.IPNet) net.IP {
