@@ -3,5 +3,5 @@ ipam:
     host: "10.215.112.21"
     wapi_version: "2.11.2"
     port: 443
-    username: "das-schiff-api"
+    username: "your-api-user"
     password: "" #Set via Environment Variable
