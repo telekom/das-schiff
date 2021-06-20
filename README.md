@@ -64,7 +64,7 @@ Therefore, we are working together with our friends from [Weaveworks - original 
 ## How Das Schiff works?
 
 Das Schiff relies on following core building blocks:
-* [Cluster API](https://github.com/kubernetes-sigs/cluster-api) (CAPI) and its providers (currently [CAPV](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere) and [Metal3](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere))
+* [Cluster API](https://github.com/kubernetes-sigs/cluster-api) (CAPI) and its providers (currently [CAPV](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere) and [Metal3](https://github.com/metal3-io/cluster-api-provider-metal3))
 * [FluxCD v2](https://github.com/fluxcd/flux2) (most notably its Kustomize and Helm controllers)
 * Das Schiff layered git repo [layout](#das-schiff-layered-repo) 
 * [SOPS](https://github.com/mozilla/sops) for the secrets stored in Git
