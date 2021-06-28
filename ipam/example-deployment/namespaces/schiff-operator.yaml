@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: engine-system
+  labels:
+    name: engine-system
+    owner: das-schiff
+    platform.das-schiff.telekom.de/name: engine-system
+    platform.das-schiff.telekom.de/owner: das-schiff

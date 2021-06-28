@@ -351,6 +351,7 @@ One concrete example of `cluster-components` repo can be found here: https://git
 
 The `ipam` folder contains our current iteration of an IPAM Controller for CAPV with infoblox backing.
 For support of Machines owned by KCP you need a patched Version of the vsphereMachineTemplate ( found in `ipam/config/samples/ `) which allows metadata like annotations inside the template spec.
+In `ipam/example-deployment` you can find an example deplyment.
 
 The IPAM controller expects the following annotations to be present on either a vsphereMachine or on the Machine that owns it:
 ```yml
@@ -379,7 +380,6 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
 kind: VSphereMachineTemplate
 metadata:
   name: example-template
-  namespace: vsphere-refsa2-bn
 spec:
   template:
     metadata:
