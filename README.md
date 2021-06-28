@@ -353,6 +353,8 @@ The `ipam` folder contains our current iteration of an IPAM Controller for CAPV 
 For support of Machines owned by KCP you need a patched Version of the vsphereMachineTemplate ( found in `ipam/config/samples/ `) which allows metadata like annotations inside the template spec.
 In `ipam/example-deployment` you can find an example deplyment.
 
+The public image lives under https://hub.docker.com/r/dasschiff/schiff-operator/
+
 The IPAM controller expects the following annotations to be present on either a vsphereMachine or on the Machine that owns it:
 ```yml
 ipam.schiff.telekom.de/NetworkName: VLAN999 # the Network name in vSphere, gets used to reference which Interface of a VM the IP needs to applied to
