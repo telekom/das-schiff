@@ -345,7 +345,82 @@ cluster-components
 
 ```
 
-One concrete example of `cluster-components` repo can be found here: https://github.com/telekom/das-schiff/tree/main/cluster-components 
+One concrete example of `cluster-components` repo can be found here: https://github.com/telekom/das-schiff/tree/main/cluster-components
+
+## IPAM
+
+The `ipam` folder contains our current iteration of an IPAM Controller for CAPV with infoblox backing.
+For support of Machines owned by KCP you need a patched Version of the vsphereMachineTemplate ( found in `ipam/config/samples/ `) which allows metadata like annotations inside the template spec.
+
+The IPAM controller expects the following annotations to be present on either a vsphereMachine or on the Machine that owns it:
+```yml
+ipam.schiff.telekom.de/NetworkName: VLAN999 # the Network name in vSphere, gets used to reference which Interface of a VM the IP needs to applied to
+ipam.schiff.telekom.de/Subnet:  10.23.142.96/28 # The network CIDR in Infobloc
+ipam.schiff.telekom.de/InfobloxNetworkView: Your-netview # The netview your IP Block resides in Infoblox
+ipam.schiff.telekom.de/DNSZone: your.example.domain.com # THe Zone under which the controller places the Hostentries created
+```
+
+Having multiple Interfaces is also supported, you can enumerate 0-, 1-, 2- and so forth for more interfaces.
+
+```yml
+ipam.schiff.telekom.de/0-NetworkName: VLAN0
+ipam.schiff.telekom.de/0-Subnet:  10.23.142.96/28
+ipam.schiff.telekom.de/0-InfobloxNetworkView: Your-netview
+ipam.schiff.telekom.de/0-DNSZone: your.example.domain.com
+ipam.schiff.telekom.de/1-NetworkName: VLAN2
+ipam.schiff.telekom.de/1-Subnet: 10.23.75.208/29
+ipam.schiff.telekom.de/1-InfobloxNetworkView: Your-netview
+ipam.schiff.telekom.de/1-DNSZone: your.example.domain.com
+```
+
+### Example vSphereMachineTemplate 
+```yml
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
+kind: VSphereMachineTemplate
+metadata:
+  name: example-template
+  namespace: vsphere-refsa2-bn
+spec:
+  template:
+    metadata:
+      annotations:
+        ipam.schiff.telekom.de/0-NetworkName: VLAN0
+        ipam.schiff.telekom.de/0-Subnet:  10.23.142.96/28
+        ipam.schiff.telekom.de/0-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/0-DNSZone: your.example.domain.com
+        ipam.schiff.telekom.de/1-NetworkName: VLAN2
+        ipam.schiff.telekom.de/1-Subnet: 10.23.75.208/29
+        ipam.schiff.telekom.de/1-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/1-DNSZone: your.example.domain.com
+    spec:
+      cloneMode: FullClone
+      datacenter: TF
+      diskGiB: 100
+      folder: /vcneter/vm/folder
+      memoryMiB: 32768
+      network:
+        devices:
+        - deviceName: eth0
+          dhcp4: false
+          gateway4: 10.23.142.97
+          nameservers:
+          - 8.8.8.8
+          networkName: VLAN0
+          searchDomains:
+          - your.example.domain.com
+        - deviceName: eth1
+          dhcp4: false
+          networkName: VLAN2
+      numCPUs: 8
+      resourcePool: resource-pool
+      server: your-vcenter.tld
+      storagePolicyName: Das-Schiff-Nearline
+      template: ubuntu-1804-2021-06-08T13-03z-kube-v1.20.7
+      thumbprint: 28:8D:85:A3:F3:EC:DA:0F:A1:A0:8C:D0:1C:04:2A:11:1D:75:48:05
+
+
+```
+
 
 ## Some public presentations
 - [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)
