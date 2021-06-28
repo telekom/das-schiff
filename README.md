@@ -469,6 +469,7 @@ spec:
 We have an example manifest in `ipam/example-deployment/schiff-operator.yaml`
 This installs into the namespace `engine-system`so either chnage that or create the namespace with `kubectl create ns engine-system`
 Optionally install the patched CRDs with `kubectl apply -f ipam/config/samples/vspheremachinetemplate.yaml`
+WARNING: if you upgrade with clusterctl, clusterctl will rollback those changes and drop the annotations from your template. You then need to reapply the CRD and your vsphereMachineTemplates with annotations.
 Install the IPAM controller with `kubectl apply -f ipam/example-deployment/schiff-operator.yaml`
 Use the annotations on your MDs or vSphereMachineTemplates.
 If you encounter Issues take a look at the IPAM controller logs.
