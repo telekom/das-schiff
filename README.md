@@ -420,7 +420,58 @@ spec:
 
 
 ```
+### example MD
+```yml
+apiVersion: cluster.x-k8s.io/v1alpha3
+kind: MachineDeployment
+metadata:
+  labels:
+    cluster.x-k8s.io/cluster-name: example
+    nodepool: example-md-0
+  name: example-md-0
+  namespace: vsphere-refsa2-bn
+spec:
+  clusterName: example
+  replicas: 3
+  minReadySeconds: 20
+  selector:
+    matchLabels: {}
+  template:
+    metadata:
+      labels:
+        cluster.x-k8s.io/cluster-name: example
+        nodepool: example-md-0
+      annotations:
+        ipam.schiff.telekom.de/0-NetworkName: VLAN0
+        ipam.schiff.telekom.de/0-Subnet:  10.23.142.96/28
+        ipam.schiff.telekom.de/0-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/0-DNSZone: your.example.domain.com
+        ipam.schiff.telekom.de/1-NetworkName: VLAN2
+        ipam.schiff.telekom.de/1-Subnet: 10.23.75.208/29
+        ipam.schiff.telekom.de/1-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/1-DNSZone: your.example.domain.com
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
+          kind: KubeadmConfigTemplate
+          name: example-md-0
+      clusterName: example
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
+        kind: VSphereMachineTemplate
+        name: example-md-4
+      nodeDrainTimeout: 900s
+      version: v1.20.7
+```
 
+### Install the IPAM Controller
+We have an example manifest in `ipam/example-deployment/schiff-operator.yaml`
+This installs into the namespace `engine-system`so either chnage that or create the namespace with `kubectl create ns engine-system`
+Optionally install the patched CRDs with `kubectl apply -f ipam/config/samples/vspheremachinetemplate.yaml`
+Install the IPAM controller with `kubectl apply -f ipam/example-deployment/schiff-operator.yaml`
+Use the annotations on your MDs or vSphereMachineTemplates.
+If you encounter Issues take a look at the IPAM controller logs.
 
 ## Some public presentations
 - [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)

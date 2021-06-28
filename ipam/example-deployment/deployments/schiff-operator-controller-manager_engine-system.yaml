@@ -39,7 +39,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: harbor.das-schiff.telekom.de/schiff/schiff-operator:0.2.4
+        image: dasschiff/schiff-operator:v0.2.5
         envFrom:
           - secretRef:
               name: schiff-operator-config
