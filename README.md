@@ -351,7 +351,7 @@ One concrete example of `cluster-components` repo can be found here: https://git
 
 The `ipam` folder contains our current iteration of an IPAM Controller for CAPV with infoblox backing.
 For support of Machines owned by KCP you need a patched Version of the vsphereMachineTemplate ( found in `ipam/config/samples/ `) which allows metadata like annotations inside the template spec.
-In `ipam/example-deployment` you can find an example deplyment.
+In `ipam/example-deployment` you can find an example deployment.
 
 The public image lives under https://hub.docker.com/r/dasschiff/schiff-operator/
 
