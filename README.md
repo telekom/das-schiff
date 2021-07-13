@@ -345,7 +345,136 @@ cluster-components
 
 ```
 
-One concrete example of `cluster-components` repo can be found here: https://github.com/telekom/das-schiff/tree/main/cluster-components 
+One concrete example of `cluster-components` repo can be found here: https://github.com/telekom/das-schiff/tree/main/cluster-components
+
+## IPAM
+
+The `ipam` folder contains our current iteration of an IPAM Controller for CAPV with infoblox backing.
+For support of Machines owned by KCP you need a patched Version of the vsphereMachineTemplate ( found in `ipam/config/samples/ `) which allows metadata like annotations inside the template spec.
+In `ipam/example-deployment` you can find an example deployment.
+
+The public image lives under https://hub.docker.com/r/dasschiff/schiff-operator/
+
+The IPAM controller expects the following annotations to be present on either a vsphereMachine or on the Machine that owns it:
+```yml
+ipam.schiff.telekom.de/NetworkName: VLAN999 # the Network name in vSphere, gets used to reference which Interface of a VM the IP needs to applied to
+ipam.schiff.telekom.de/Subnet:  10.23.142.96/28 # The network CIDR in Infobloc
+ipam.schiff.telekom.de/InfobloxNetworkView: Your-netview # The netview your IP Block resides in Infoblox
+ipam.schiff.telekom.de/DNSZone: your.example.domain.com # THe Zone under which the controller places the Hostentries created
+```
+
+Having multiple Interfaces is also supported, you can enumerate 0-, 1-, 2- and so forth for more interfaces.
+
+```yml
+ipam.schiff.telekom.de/0-NetworkName: VLAN0
+ipam.schiff.telekom.de/0-Subnet:  10.23.142.96/28
+ipam.schiff.telekom.de/0-InfobloxNetworkView: Your-netview
+ipam.schiff.telekom.de/0-DNSZone: your.example.domain.com
+ipam.schiff.telekom.de/1-NetworkName: VLAN2
+ipam.schiff.telekom.de/1-Subnet: 10.23.75.208/29
+ipam.schiff.telekom.de/1-InfobloxNetworkView: Your-netview
+ipam.schiff.telekom.de/1-DNSZone: your.example.domain.com
+```
+
+### Example vSphereMachineTemplate 
+```yml
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
+kind: VSphereMachineTemplate
+metadata:
+  name: example-template
+spec:
+  template:
+    metadata:
+      annotations:
+        ipam.schiff.telekom.de/0-NetworkName: VLAN0
+        ipam.schiff.telekom.de/0-Subnet:  10.23.142.96/28
+        ipam.schiff.telekom.de/0-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/0-DNSZone: your.example.domain.com
+        ipam.schiff.telekom.de/1-NetworkName: VLAN2
+        ipam.schiff.telekom.de/1-Subnet: 10.23.75.208/29
+        ipam.schiff.telekom.de/1-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/1-DNSZone: your.example.domain.com
+    spec:
+      cloneMode: FullClone
+      datacenter: TF
+      diskGiB: 100
+      folder: /vcneter/vm/folder
+      memoryMiB: 32768
+      network:
+        devices:
+        - deviceName: eth0
+          dhcp4: false
+          gateway4: 10.23.142.97
+          nameservers:
+          - 8.8.8.8
+          networkName: VLAN0
+          searchDomains:
+          - your.example.domain.com
+        - deviceName: eth1
+          dhcp4: false
+          networkName: VLAN2
+      numCPUs: 8
+      resourcePool: resource-pool
+      server: your-vcenter.tld
+      storagePolicyName: Das-Schiff-Nearline
+      template: ubuntu-1804-2021-06-08T13-03z-kube-v1.20.7
+      thumbprint: 28:8D:85:A3:F3:EC:DA:0F:A1:A0:8C:D0:1C:04:2A:11:1D:75:48:05
+
+
+```
+### example MD
+```yml
+apiVersion: cluster.x-k8s.io/v1alpha3
+kind: MachineDeployment
+metadata:
+  labels:
+    cluster.x-k8s.io/cluster-name: example
+    nodepool: example-md-0
+  name: example-md-0
+  namespace: vsphere-refsa2-bn
+spec:
+  clusterName: example
+  replicas: 3
+  minReadySeconds: 20
+  selector:
+    matchLabels: {}
+  template:
+    metadata:
+      labels:
+        cluster.x-k8s.io/cluster-name: example
+        nodepool: example-md-0
+      annotations:
+        ipam.schiff.telekom.de/0-NetworkName: VLAN0
+        ipam.schiff.telekom.de/0-Subnet:  10.23.142.96/28
+        ipam.schiff.telekom.de/0-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/0-DNSZone: your.example.domain.com
+        ipam.schiff.telekom.de/1-NetworkName: VLAN2
+        ipam.schiff.telekom.de/1-Subnet: 10.23.75.208/29
+        ipam.schiff.telekom.de/1-InfobloxNetworkView: Your-netview
+        ipam.schiff.telekom.de/1-DNSZone: your.example.domain.com
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
+          kind: KubeadmConfigTemplate
+          name: example-md-0
+      clusterName: example
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
+        kind: VSphereMachineTemplate
+        name: example-md-4
+      nodeDrainTimeout: 900s
+      version: v1.20.7
+```
+
+### Install the IPAM Controller
+We have an example manifest in `ipam/example-deployment/schiff-operator.yaml`
+This installs into the namespace `engine-system`so either chnage that or create the namespace with `kubectl create ns engine-system`
+Optionally install the patched CRDs with `kubectl apply -f ipam/config/samples/vspheremachinetemplate.yaml`
+WARNING: if you upgrade with clusterctl, clusterctl will rollback those changes and drop the annotations from your template. You then need to reapply the CRD and your vsphereMachineTemplates with annotations.
+Install the IPAM controller with `kubectl apply -f ipam/example-deployment/schiff-operator.yaml`
+Use the annotations on your MDs or vSphereMachineTemplates.
+If you encounter Issues take a look at the IPAM controller logs.
 
 ## Some public presentations
 - [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)
