@@ -106,7 +106,13 @@ func (m *Manager) GetOrAllocateIP(deviceFQDN, networkView string, subnet *net.IP
 	// if there is no host record, create a new one
 	ea := make(ibclient.EA)
 	log.Info("Creating HostRecord")
-	hostRecord, err = objMgr.CreateHostRecord(true, deviceFQDN, networkView, "default."+networkView, subnet.String(), "", "", ea)
+	dnsView := ""
+	if networkView == "default" {
+		dnsView = "default"
+	} else {
+		dnsView = "default." + networkView
+	}
+	hostRecord, err = objMgr.CreateHostRecord(true, deviceFQDN, networkView, dnsView, subnet.String(), "", "", ea)
 	if err != nil {
 		log.Error(err, "Could not allocate IP")
 		return nil, err
