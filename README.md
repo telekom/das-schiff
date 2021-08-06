@@ -351,6 +351,7 @@ One concrete example of `cluster-components` repo can be found here: https://git
 - [Das Schiff at Cluster API Office Hours Apr 15th, 2020](https://youtu.be/yXHDPILQyh4?list=PL69nYSiGNLP29D0nYgAGWt1ZFqS9Z7lw4&t=251)
 - [Talking about Das Schiff in Semaphore Uncut with Darko Fabijan](https://semaphoreci.com/blog/cloud-native-adoption-vuk-gojnic)
 - [Talking about Das Sciff in Art of Modern Ops with Cornelia Davis](https://www.weave.works/blog/kubernetes-at-deutsche-telekom-gitops-at-the-edge)
+- [KubeCon Europe 2021 Keynote: How Deutsche Telekom built Das Schiff to sail Cloud Native Seas](https://www.youtube.com/watch?v=s0UKWiNNFTM)
 
 ## Licensing
 
