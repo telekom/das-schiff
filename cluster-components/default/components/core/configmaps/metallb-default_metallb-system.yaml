@@ -1,8 +1,0 @@
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: metallb-default
-  namespace: metallb-system
-data:
-  values.yaml: |
