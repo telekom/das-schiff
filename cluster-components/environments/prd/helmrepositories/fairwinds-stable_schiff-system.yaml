@@ -1,8 +1,0 @@
-apiVersion: source.toolkit.fluxcd.io/v1beta1
-kind: HelmRepository
-metadata:
-  name: fairwinds-stable
-  namespace: schiff-system
-spec:
-  interval: 5m
-  url: https://harbor.sce-dcn.net/chartrepo/helm-fairwinds-stable
