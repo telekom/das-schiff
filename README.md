@@ -3,7 +3,7 @@
 
 # Das Schiff
 
-Das SCHIFF is a GitOps based Kubernetes Cluster as a Service plattform almost exclusively built using open-source components. Created by and intended for production use at [Deutsche Telekom Technik](https://de.wikipedia.org/wiki/Telekom_Deutschland#Deutsche_Telekom_Technik_GmbH) to provide Kubernetes clusters to internal teams. It is hosted on-prem on both vSphere and bare metal at various private data centers in Germany.
+Das SCHIFF is a GitOps based Kubernetes Cluster as a Service platform almost exclusively built using open-source components. Created by and intended for production use at [Deutsche Telekom Technik](https://de.wikipedia.org/wiki/Telekom_Deutschland#Deutsche_Telekom_Technik_GmbH) to provide Kubernetes clusters to internal teams. It is hosted on-prem on both vSphere and bare metal at various private data centers in Germany.
 
 This repository provides some insights into how Das Schiff works. It gives an overview of our architecture and describes the Git repository structure we are planning to scale to thousands of clusters.
 
@@ -23,9 +23,9 @@ If we develop new components for our platform, we always consider whether we can
 
 ## Our Challenge
 
-Deutsche Telekom Technik (DTT) is a subsidary of Telekom Deutschland, the leading integrated communications provider in Germany, which in turn is part of [Deutsche Telekom Group](https://www.telekom.com/en). Deutsche Telekom Technik handles the technical delivery of the communication services offered by Telekom Deutschland. It provides the infrastructure for more than 17.5M fixed line and 48.8M mobile customers.
+Deutsche Telekom Technik (DTT) is a subsidiary of Telekom Deutschland, the leading integrated communications provider in Germany, which in turn is part of [Deutsche Telekom Group](https://www.telekom.com/en). Deutsche Telekom Technik handles the technical delivery of the communication services offered by Telekom Deutschland. It provides the infrastructure for more than 17.5M fixed line and 48.8M mobile customers.
 
-Similar to all telco providers, we do not primarily run typical IT workloads. Instead we operate networks and run network functions, service platforms and the related management systems. Modern examples are 5G core, ORAN DU, remote UPF, BNG, IMS, IPTV and so on. Large portions of these functions and services are geo-distributed due to the nature of communications technology (e.g. mobile towers). Looking at Germany as a whole, we are talking about a few thousand clusters at hundreds of locations in Germany (when including far edge locaitons).
+Similar to all telco providers, we do not primarily run typical IT workloads. Instead we operate networks and run network functions, service platforms and the related management systems. Modern examples are 5G core, ORAN DU, remote UPF, BNG, IMS, IPTV and so on. Large portions of these functions and services are geo-distributed due to the nature of communications technology (e.g. mobile towers). Looking at Germany as a whole, we are talking about a few thousand clusters at hundreds of locations in Germany (when including far edge locations).
 
 All of these workloads are rapidly transitioning towards a cloud native architecture. This creates a demand for modern platforms to run those workloads, which we aim to provide with Kubernetes. Das SCHIFF therefore set itself the following challenge:
 
@@ -37,19 +37,19 @@ To tackle this problem we started building Das SCHIFF. Since then, we came up wi
 
 ### GitOps to the core
 
-Das Schiff is following the GitOps approach for everything we do. All configuration that does not come from external systems is dervied from the content of a Git repository. Almost all the data is stored in the form of manifests, some of which contain nested configuration files though (e.g. Helm values files). All changes are performed as Pull Requests with validation and approvals.
+Das Schiff is following the GitOps approach for everything we do. All configuration that does not come from external systems is derived from the content of a Git repository. Almost all the data is stored in the form of manifests, some of which contain nested configuration files though (e.g. Helm values files). All changes are performed as Pull Requests with validation and approvals.
 
 ### Full Automation
 
 We try to automate whatever we can. This includes internal systems, some of which feel pretty legacy in a cloud-native world, as well as our network fabric. And of course the deployment and lifecycle of our clusters.
 
-### Homogenuous Clusters
+### Homogeneous Clusters
 
 In order to manage a large amount of clusters with a small team, the clusters need to be as similar to each other as possible. We therefore avoid any configuration that is specific to a single customer. Most configuration is applied on a global scope, with environment and site specific overrides where necessary.
 
-### Agressive Upgrade Cycles
+### Aggressive Upgrade Cycles
 
-For clusters to stay homogenous, all of them should also be running the same software versions. To achieve this, we mandate a very agressive upgrade strategy:
+For clusters to stay homogenous, all of them should also be running the same software versions. To achieve this, we mandate a very aggressive upgrade strategy:
 
   - we have a test environment to which changes are applied very quickly and without notification in advance
   - after two weeks, changes are bundled and applied to the reference environment
@@ -96,7 +96,7 @@ In addition we run several components on top of the clusters
   - The monitoring stack consists of [Prometheus](https://prometheus.io/), [Thanos](https://thanos.io/) and [Grafana](https://grafana.com/grafana/) and is deployed using [prometheus-operator](https://github.com/prometheus-operator/prometheus-operator) and [grafana-operator](https://github.com/grafana-operator/grafana-operator)
   - Logs are shipped to various destinations with [Vector](https://vector.dev/).
   - [Velero](https://velero.io/) is used for apiserver backups to internal S3 compatible storage
-  - All clusters enforce community-recommended as well as internallay required security policies using [Kyverno](https://kyverno.io/)
+  - All clusters enforce community-recommended as well as internally required security policies using [Kyverno](https://kyverno.io/)
   - [RBAC Manager](https://github.com/FairwindsOps/rbac-manager) is used to make RBAC easier to handle
   - [metalLB](https://metallb.universe.tf/) acts as the load balancer for services
 
@@ -116,7 +116,7 @@ We also store secrets in Git. They are encrypted of course and we are using [sop
 
 ### Deploying a Cluster
 
-Lets have a look at the cluster deployment process to make this a little clearer. The following graphic shows a very rough visualization of a single management and a single tenant cluster, our git repostiories, an engineer and a few errors that symbolize data flow and actions.
+Lets have a look at the cluster deployment process to make this a little clearer. The following graphic shows a very rough visualization of a single management and a single tenant cluster, our git repositories, an engineer and a few errors that symbolize data flow and actions.
 
 <p align="left"><img src="images/das-schiff-loop.png" width=600 align="center"></p>
 
@@ -138,7 +138,7 @@ Since we are not there yet, here is the structure of our current `cluster-defini
 
 ```bash
 cluster-definitions 
-├ schiff-management-cluster-x # defintions are grouped per management cluster
+├ schiff-management-cluster-x # definitions are grouped per management cluster
 │ │
 │ │ # The Cluster API deployment in a management cluster also manages the
 │ │ # cluster it is deployed in, using the manifests located here.
@@ -237,7 +237,7 @@ spec:
       name: customer_A-workload-cluster-1-kubeconfig
 ``` -->
 
-The `cluster-components` repository is a bit more complex. Both, its structure and its history. Our initial approach was very hierarchical, with configuration at different locations overriding each other. This made the configuration very DRY (don't repeat youreself). But it was also hard to figure out where a specific value is coming from, and more importantly: it prevented us from performing staged rollouts of changes, or at least made them very difficult. Our current layout therefore bundles everything into *components* which are versioned. If you are interested in what exactly we changed and why, have a look [here](./cluster-components-history.md).
+The `cluster-components` repository is a bit more complex. Both, its structure and its history. Our initial approach was very hierarchical, with configuration at different locations overriding each other. This made the configuration very DRY (don't repeat yourself). But it was also hard to figure out where a specific value is coming from, and more importantly: it prevented us from performing staged rollouts of changes, or at least made them very difficult. Our current layout therefore bundles everything into *components* which are versioned. If you are interested in what exactly we changed and why, have a look [here](./cluster-components-history.md).
 
 ```bash
 cluster-components
@@ -333,7 +333,7 @@ We have already ran into a few issues with the new approach for components. We w
 
 ### Can Das Schiff be used outside of Deutsche Telekom Technik?
 
-No. Or at least - not exactly. Since most of Das Schiff is open source, you can build your own plattform using the same components, and if it fits your needs, mimicking our repositories. But Das Schiff as a whole is tightly integrated into internal systems at Deutsche Telekom Technik, and those integrations are probably of little use for you. If you need help doing so, feel free to reach out to our friends from [Weaveworks](https://www.weave.works/), who are helping us build Das Schiff.
+No. Or at least - not exactly. Since most of Das Schiff is open source, you can build your own platform using the same components, and if it fits your needs, mimicking our repositories. But Das Schiff as a whole is tightly integrated into internal systems at Deutsche Telekom Technik, and those integrations are probably of little use for you. If you need help doing so, feel free to reach out to our friends from [Weaveworks](https://www.weave.works/), who are helping us build Das Schiff.
 
 ### Is Das Schiff part of any industry initiative?
 
