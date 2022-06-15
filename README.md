@@ -1,5 +1,5 @@
 
-<p align="center"><img height="140px" src="images/das-schiff-logo.png" align="center"></p>
+<p align="center"><img height="150px" src="images/das-schiff-logo.png" align="center"></p>
 
 # Das Schiff
 
