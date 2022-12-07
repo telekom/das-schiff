@@ -316,7 +316,7 @@ We have already ran into a few issues with the new approach for components. We w
 
 ## We're Hiring!
 
-If all of this sounds interesting to you, and you want to help building and operating a Kubernetes platform with us, we have good news: we're hiring!
+If all of this sounds interesting to you, and you want to help building and operating a Kubernetes platform with us, and are living somewhere in Europe, we have good news: we're hiring!
 
 We are looking for Site Reliability Engineers and Go Developers that have experience with Kubernetes, GitOps (we're using flux), Cluster API (and the CAPV and CAPM3 providers), network fabrics, Prometheus, GitLab, Software Engineering in Go and working on Open Source projects. Of course you do not need to know about all of these topics, especially if you are eager learn.
 
