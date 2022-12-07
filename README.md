@@ -314,7 +314,7 @@ We have already ran into a few issues with the new approach for components. We w
   * It is easier to feed the properties of a cluster (e.g. environment, site) into charts than `Kustomizations`
   * Helm's templating is more powerful than kustomzie, which should make configuration easier in a few cases
 
-## We're hiring
+## We're Hiring!
 
 If all of this sounds interesting to you, and you want to help building and operating a Kubernetes platform with us, we have good news: we're hiring!
 
