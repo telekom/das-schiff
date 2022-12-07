@@ -314,6 +314,14 @@ We have already ran into a few issues with the new approach for components. We w
   * It is easier to feed the properties of a cluster (e.g. environment, site) into charts than `Kustomizations`
   * Helm's templating is more powerful than kustomzie, which should make configuration easier in a few cases
 
+## We're hiring
+
+If all of this sounds interesting to you, and you want to help building and operating a Kubernetes platform with us, we have good news: we're hiring!
+
+We are looking for Site Reliability Engineers and Go Developers that have experience with Kubernetes, GitOps (we're using flux), Cluster API (and the CAPV and CAPM3 providers), network fabrics, Prometheus, GitLab, Software Engineering in Go and working on Open Source projects. Of course you do not need to know about all of these topics, especially if you are eager learn.
+
+If we've caught your interest, please get in touch with @vukg, our squad lead, on [LinkedIn](https://www.linkedin.com/in/vuk-gojnic/) or [Twitter](https://twitter.com/vukgojnic)!
+
 ## Conference Talks and Media Coverage
 
 #### 2022
