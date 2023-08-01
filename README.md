@@ -17,7 +17,7 @@ Note: This repository is not code focused. We do have some open source component
 If we develop new components for our platform, we always consider whether we can open-source them, and we have published the following projects so far:
 
 - [telekom/netplanner](https://github.com/telekom/netplanner) - a netplan.io compatible CLI with support for more netdev devices
-- [telekom/das-schiff-network-operator](https://github.com/telekom/das-schiff-network-operator) - 
+- [telekom/das-schiff-network-operator](https://github.com/telekom/das-schiff-network-operator) - a controller which configures netlink and frr for Telekom specific network connectivity.
 - [telekom/cluster-api-ipam-provider-in-cluster](https://github.com/telekom/cluster-api-ipam-provider-in-cluster) - a work-in-progress implementation of an in-cluster IPAM provider for the new [IPAM integration](https://github.com/kubernetes-sigs/cluster-api/pull/6000) in Cluster API that we are driving
 - [telekom/das-schiff-operator](https://github.com/telekom/das-schiff-operator) - a collection of a few hacky controllers for ipam integration and backing up kubeconfig files to Git
 
@@ -324,6 +324,10 @@ If we've caught your interest, please get in touch with [@vukg](https://github.c
 
 ## Conference Talks and Media Coverage
 
+#### 2023
+- [GitOps, Fail, Repeat – Lessons Learned From Running a Heterogeneous Platform](https://www.youtube.com/watch?v=Wa1YD0HUXXs)
+- [Open Networking Enables Deutsche Telekom to Sail the Cloud Native Seas](https://www.youtube.com/watch?v=citS0Lr9oQk)
+- [DT Implementing SONiC Architecture within Multi VRF Datacenters - Jens Jetzork | SONiC Workshop](https://www.youtube.com/watch?v=nppiJvpFxfg)
 #### 2022
 - [Making On-Prem Bare-Metal Kubernetes Network Stack Telco Ready](https://kccnceu2022.sched.com/event/ytuA), KubeCon Europe 2022
 
@@ -350,7 +354,7 @@ The [CNCF CNF-WG](https://github.com/cncf/cnf-wg) is an attempt to create moment
 ## License
 
 ```
-Copyright (c) 2022 Deutsche Telekom AG.
+Copyright (c) 2023 Deutsche Telekom AG.
 
 Licensed under the **Apache License, Version 2.0** (the "License"); you may not use this file except in compliance with the License.
 

@@ -8,7 +8,7 @@ We have recently changed our approach to managing the configuration of the compo
 * Network zones - applied to clusters in a specific network segment
 * Sites - applied to clusters hostet at a specific site
 * Customers - applied to clusters that belong to a internal customer
-* Cluster
+* Cluster - applied on this specific cluster.
 
 We used the ignore spec of `GitRepositories` in conjunction with paths in `Kustomizations` to apply folders from the structure below. The `GitRepositories` were always pointing to our `main` branch, so any changes were immediately applied to all of our clusters. While this makes it easy to perform changes, it is very risky when managing lots of clusters in case something goes wrong. Especially when performing changes at the default level. In addition, the folder structure is very complex (see below). It takes a while until you can find your way around, and its quite hard to track where a specific config option is coming from.
 
